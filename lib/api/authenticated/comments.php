@@ -38,7 +38,7 @@ switch($_SERVER['REQUEST_METHOD']) {
 		//TODO(Rennorb) @cleanup @correctness: This should just get replaced with delta detection (kinda).
 		function stripImageForChangelog($html)
 		{
-			return preg_replace('#src="data:image/png;base64,.*?"#', 'src="x"', $html); //TODO(Rennorb): @perf
+			return preg_replace('#src="data:image/.*?"#', 'src="x"', $html); //TODO(Rennorb): @perf
 		}
 
 		$strippedOld = stripImageForChangelog($comment['text']);
