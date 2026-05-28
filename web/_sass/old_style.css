@@ -540,8 +540,11 @@ h2 .title {
 	height: 50px;
 }
 
-.file small {
+.file .details>* {
 	display: block;
+}
+
+.file small {
 	font-size: x-small;
 }
 

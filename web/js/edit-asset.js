@@ -102,7 +102,10 @@ $(document).ready(function () {
 			$(".uploadprogress", $elem).hide();
 			$elem.append("<a href=\"#\" class=\"delete\" data-fileid=\"" + response.fileid + "\"></a>");
 			$(".uploaddate", $elem).text(response.uploaddate);
-			if(response.imagesize) $(".imagesize", $elem).text(response.imagesize+' px');
+			if(response.imagesize) {
+				$(".imagesize", $elem).text(response.imagesize+' px').after(' - ');
+			}
+			$(".size", $elem).text(R.formatByteSize(e.file.size));
 
 			if(typeof(onUploadFinished) === 'function') onUploadFinished(response);
 		},

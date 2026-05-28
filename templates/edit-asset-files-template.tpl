@@ -5,10 +5,13 @@
 			<div class="fi-content"></div>
 		</div>
 		<img src="" style="display:none;" />
-		<div>
+		<div class="details">
 			<h5 class="filename"></h5>
 			<small class="uploaddate"></small>
-			<small class="imagesize"></small>
+			<small>
+				<span class="imagesize"></span>
+				<span class="size"></span>
+			</small>
 		</div>
 		<div class="uploadprogress"></div>
 	</a>

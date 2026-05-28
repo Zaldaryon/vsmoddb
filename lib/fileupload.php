@@ -96,7 +96,7 @@ function processFileUpload($file, $assetTypeId, $parentAssetId, $parentModId) {
 	$cdnBasePath = generateCdnFileBasenameWithPath($user['userId'], $localPath, $filebasename);
 	$cdnFilePath = "{$cdnBasePath}.{$ext}";
 
-	$data = array("name" => $file['name'], "cdnPath" => $cdnFilePath, "assetTypeId" => $assetTypeId, "userId" => $user['userId'], "order" => $quantityfiles);
+	$data = array("name" => $file['name'], "cdnPath" => $cdnFilePath, "assetTypeId" => $assetTypeId, "userId" => $user['userId'], "order" => $quantityfiles, "size" => $file['size']);
 	if($parentAssetId) $data["assetId"] = $parentAssetId;
 
 	$acceptedImage = false;

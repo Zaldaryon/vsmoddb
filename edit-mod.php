@@ -410,6 +410,7 @@ else if(!empty($_POST['save'])) {
 			break;
 		}
 
+		$croppedFileSize = filesize($croppedFileLocalPath);
 
 		$cdnPath = "$cdnBasePath.$ext";
 		$uploadResult = uploadToCdn($croppedFileLocalPath, $cdnPath);
@@ -423,8 +424,8 @@ else if(!empty($_POST['save'])) {
 		$con->startTrans();
 
 		$con->execute(
-			'INSERT INTO files (assetId, assetTypeId, userId, name, cdnPath, `order`) VALUES (?, ?, ?, ?, ?, ?)',
-			[$dbImage['assetId'], ASSETTYPE_MOD, $dbImage['userId'], $croppedFilename, $cdnPath, count($filesInOrder)]
+			'INSERT INTO files (assetId, assetTypeId, userId, name, cdnPath, `order`, `size`) VALUES (?, ?, ?, ?, ?, ?, ?)',
+			[$dbImage['assetId'], ASSETTYPE_MOD, $dbImage['userId'], $croppedFilename, $cdnPath, count($filesInOrder), $croppedFileSize]
 		);
 		$fileId = $con->Insert_ID();
 		$con->execute('INSERT INTO fileImageData (fileId, hasThumbnail, size) VALUES (?, 1, POINT(480, 320))', [$fileId]);

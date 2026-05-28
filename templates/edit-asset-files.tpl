@@ -5,10 +5,13 @@
 			{if $file['hasThumbnail']}
 				<a data-fancybox="gallery" href="{$file['url']}">
 					<img src="{formatCdnUrl($file, '_55_60')}"/>
-					<div>
+					<div class="details">
 						<h5 class="filename">{$file["name"]}</h5>
 						<small class="uploaddate">{$file["created"]}</small>
-						<small class="imagesize">{$file["imageSize"]} px</small>
+						<small>
+							<span class="imagesize">{$file["imageSize"]} px</span>
+							{if $file["size"]} - <span class="size">{formatByteSize($file["size"])}</span>{/if}
+						</small>
 					</div>
 				</a>
 			{else}
@@ -16,9 +19,10 @@
 					<div class="fi fi-{$file['ext']}">
 						<div class="fi-content">{$file['ext']}</div>
 					</div>
-					<div>
+					<div class="details">
 						<h5 class="filename">{$file["name"]}</h5>
 						<small class="uploaddate">{$file["created"]}</small>
+						{if $file["size"]}<small class="size">{formatByteSize($file["size"])}</small>{/if}
 					</div>
 				</a>
 			{/if}
