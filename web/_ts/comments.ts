@@ -199,7 +199,6 @@ function attachCommentHandlers() {
 
 		let targetOrder = 0;
 
-		const oldestFirst = $.cookie("commentsort") === 'oldestfirst';
 		if($.cookie("commentstructure") !== "flat") {
 			let wrapper = targetCommentEl.parentElement!;
 			if(!wrapper.classList.contains('convo') || !parseInt(targetCommentEl.dataset.cldn!)) {
@@ -210,25 +209,15 @@ function attachCommentHandlers() {
 				targetCommentEl = commentEl;
 			}
 
-			if(oldestFirst) {
-				let closestComment = wrapper;
-				while(!closestComment.classList.contains('comment'))
-					closestComment = closestComment.lastElementChild! as HTMLElement;
-				targetOrder = parseFloat(closestComment.dataset.order!);
-	
-				wrapper.appendChild(editorWrapperEl);
-			}
-			else {
-				let closestComment = wrapper;
-				while(!closestComment.classList.contains('comment'))
-					closestComment = closestComment.firstElementChild! as HTMLElement;
-				targetOrder = parseFloat(closestComment.dataset.order!);
-	
-				wrapper.insertBefore(editorWrapperEl, wrapper.firstElementChild);
-			}
+			let closestComment = wrapper;
+			while(!closestComment.classList.contains('comment'))
+				closestComment = closestComment.lastElementChild! as HTMLElement;
+			targetOrder = parseFloat(closestComment.dataset.order!);
+
+			wrapper.appendChild(editorWrapperEl);
 		}
 		else {
-			if(oldestFirst) {
+			if($.cookie("commentsort") === 'oldestfirst') {
 				container.append(editorWrapperEl);
 			}
 			else {
