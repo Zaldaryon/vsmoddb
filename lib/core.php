@@ -604,6 +604,64 @@ function escapeStringForLikeQuery($str)
 	return str_replace(['_', '%'], ['\_', '\%'], $str);
 }
 
+/**
+ * Formats words as `+word*`, but preserves user-provided + and - prefixes, as well as quoted sections.
+ * @param string $input Raw user search input.
+ * @return string Boolean mode expression.
+ */
+function preprocessStringForFulltextQuery($input)
+{
+	$input = trim($input);
+	if(!$input) return '';
+
+	// Split into words and quoted sections:
+	$parts = preg_split('/("[^"]*")|\s+/', $input, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+	// Manually filter out "", as that  will not be filtered out by PREG_SPLIT_NO_EMPTY because it is not "empty":
+	$parts = array_filter($parts, fn($p) => $p !== '""');
+
+	foreach($parts as &$part) {
+		if($part[0] === '"') continue; // don't touch quoted sections
+
+		switch($part[0]) {
+			case '+': case '-': // acceptable prefix
+				if(strlen($part) === 1) $part = '"'.$part.'"';
+				else {
+					$end = str_ends_with($part, '*') ? -1 : null;
+					$word = substr($part, 1, $end);
+
+					$needsEscape = strpbrk($word, '+-~<>()*') !== false;
+					if($needsEscape) {
+						$part = $part[0].'"'.$word.'"'; // cannot *-extend a quoted string
+					}
+					else {
+						$part = $part[0].$word.'*';
+					}
+				}
+				break;
+
+			case '*':
+				if(strlen($part) === 1) $part = '"*"';
+				break;
+
+			default:
+				$word = str_ends_with($part, '*') ? substr($part, 0, -1) : $part;
+
+				$needsEscape = strpbrk($word, '+-~<>()*') !== false;
+				if($needsEscape) {
+					if(strlen($word) === 1) $part = '"'.$word.'"';
+					else  $part = '+"'.$word.'"'; break; // cannot *-extend a quoted string
+				}
+				else {
+					$part = '+'.$word.'*';
+				}
+				break;
+		}
+	}
+	unset($part);
+
+	return implode(' ', $parts);
+}
+
 
 /** Inflates links and creates spoiler elements.
  * @param string $html

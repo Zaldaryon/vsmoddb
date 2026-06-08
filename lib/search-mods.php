@@ -241,8 +241,15 @@ function queryModSearch($searchParams)
 				$joinParamsOffset += 3;
 
 				$whereClauses .= $whereClauses ? ' AND ' : 'WHERE ';
-				$whereClauses .= '(a.name LIKE ? OR m.summary LIKE ? OR m.descriptionSearchable LIKE ?)';
-				array_push($sqlParams, $v, $v, $v);
+				if(strlen($value) >= 3) {
+					$ftTerm = preprocessStringForFulltextQuery($value);
+					$whereClauses .= '(MATCH(a.name) AGAINST(? IN BOOLEAN MODE) OR MATCH(m.summary, m.descriptionSearchable) AGAINST(? IN BOOLEAN MODE))';
+					array_push($sqlParams, $ftTerm, $ftTerm);
+				} else {
+					// Below ft_min_word_len (default 3), FULLTEXT won't match. Fall back to LIKE.
+					$whereClauses .= '(a.name LIKE ? OR m.summary LIKE ? OR m.descriptionSearchable LIKE ?)';
+					array_push($sqlParams, $v, $v, $v);
+				}
 
 				$orderBy = 'matchScore DESC, '.$orderBy;
 
