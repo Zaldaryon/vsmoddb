@@ -212,8 +212,6 @@ function queryModSearch($searchParams)
 	foreach($searchParams['filters'] as $name => $value) {
 		switch($name) {
 			case 'text':
-				$v = '%'.escapeStringForLikeQuery($value).'%';
-
 				// We want to return results ordered by relevance, so we build a 'score' metric to order by.
 				// This score metric is constructed as follows:
 				//   score := 0
@@ -235,17 +233,35 @@ function queryModSearch($searchParams)
 				// 3 - (0 - 1) & 0b11 = 3 - (0xffffffff & 0x11) = 3 - 3 = 0   // search not found
 				// 3 - (1 - 1) & 0b11 = 3 - (0x00000000 & 0x11) = 3 - 0 = 3   // match starts at first letter
 				// 3 - (2 - 1) & 0b11 = 3 - (0x00000001 & 0x11) = 3 - 1 = 2   // match starts later
-				$matchScoreFormular = '(3 - ((LEAST(LOCATE(LOWER(?), LOWER(a.name)), 2) - 1) & 0b11)) * 5 + (m.summary LIKE ?) * 5 + (m.descriptionSearchable LIKE ?)';
-				$matchScoreSelect = $matchScoreFormular.' as matchScore,';
-				array_unshift($sqlParams, $value, $v, $v);
-				$joinParamsOffset += 3;
 
 				$whereClauses .= $whereClauses ? ' AND ' : 'WHERE ';
 				if(strlen($value) >= 3) {
-					$ftTerm = preprocessStringForFulltextQuery($value);
+					$v = preprocessStringForFulltextQuery($value);
+
+					// FULLTEXT search using MATCH .. AGAINST makes this fuzzy which catches partial words and order mismatches. LOCATE is still used to prioritize exact matches in the name.
+					$matchScoreFormular = <<<SQL
+						(3 - ((LEAST(LOCATE(LOWER(?), LOWER(a.name)), 2) - 1) & 0b11)) * 5 + (MATCH(a.name) AGAINST(? IN BOOLEAN MODE) > 0) * 5
+						+ (MATCH(m.summary, m.descriptionSearchable) AGAINST(? IN BOOLEAN MODE) > 0)
+					SQL; //NOTE(Rennorb) @correctness: Does not differentiate between summary and description for scoring... probably not the best idea.
+					$matchScoreSelect = $matchScoreFormular.' as matchScore,';
+					array_unshift($sqlParams, $value, $v, $v);
+					$joinParamsOffset += 3;
+
 					$whereClauses .= '(MATCH(a.name) AGAINST(? IN BOOLEAN MODE) OR MATCH(m.summary, m.descriptionSearchable) AGAINST(? IN BOOLEAN MODE))';
-					array_push($sqlParams, $ftTerm, $ftTerm);
-				} else {
+					array_push($sqlParams, $v, $v);
+				}
+				else {
+					$v = '%'.escapeStringForLikeQuery($value).'%';
+
+					$matchScoreFormular = <<<SQL
+						(3 - ((LEAST(LOCATE(LOWER(?), LOWER(a.name)), 2) - 1) & 0b11)) * 5
+						+ (m.summary LIKE ?) * 5
+						+ (m.descriptionSearchable LIKE ?)
+					SQL;
+					$matchScoreSelect = $matchScoreFormular.' as matchScore,';
+					array_unshift($sqlParams, $value, $v, $v);
+					$joinParamsOffset += 3;
+
 					// Below ft_min_word_len (default 3), FULLTEXT won't match. Fall back to LIKE.
 					$whereClauses .= '(a.name LIKE ? OR m.summary LIKE ? OR m.descriptionSearchable LIKE ?)';
 					array_push($sqlParams, $v, $v, $v);
