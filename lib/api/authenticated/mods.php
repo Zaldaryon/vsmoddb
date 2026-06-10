@@ -80,7 +80,7 @@ switch($urlparts[1]) {
 					");
 				}
 
-				logAssetChanges(['Added a new comment.'], $assetId);
+				logAuditEvent(AUDIT_LOG_KIND_COMMENT_CREATE, $modId);
 
 				$ok = $con->completeTrans();
 				if(!$ok)  fail(HTTP_INTERNAL_ERROR, ['reason' => 'Database error.']);
@@ -129,7 +129,7 @@ switch($urlparts[1]) {
 		$con->startTrans();
 		// @security: assetid comes from the db and is an int, therefore sql inert. 
 		$con->execute('UPDATE assets SET statusId = '.STATUS_LOCKED.' WHERE assetId = '.$modData['assetId']);
-		logAssetChanges(['Locked Mod for reason: '.$reason], $modData['assetId']);
+		logAuditEvent(AUDIT_LOG_KIND_MOD_CHANGE_STATUS, $modId, $reason, AUDIT_LOG_FLAG_MODACTION);
 
 		logModeratorAction($modData['createdByUserId'], $user['userId'], MODACTION_KIND_LOCK, $modId, SQL_DATE_FOREVER, $reason);
 
@@ -177,11 +177,14 @@ switch($urlparts[1]) {
 
 						$con->startTrans();
 
-						$assetId = $con->getOne('SELECT assetId FROM mods WHERE modId = ?', [$modId]);
-						if(!$assetId) fail(HTTP_NOT_FOUND);
+						$oldData = $con->getRow('SELECT uploadLimitOverwrite FROM mods WHERE modId = ?', [$modId]);
+						if(!$oldData) fail(HTTP_NOT_FOUND);
 
 						$con->execute('UPDATE mods SET uploadLimitOverwrite = ? WHERE modId = ?', [$newLimit, $modId]);
-						logAssetChanges(['Changed release upload limit to '.formatByteSize($newLimit)], $assetId);
+
+						$old = $oldData['uploadLimitOverwrite'] ? formatByteSize($oldData['uploadLimitOverwrite']) : 'default';
+						$diff = createAuditLogDiff($old, formatByteSize($newLimit));
+						logAuditEvent(AUDIT_LOG_KIND_MOD_CHANGE_UPLOAD_LIMIT, $modId, $diff, AUDIT_LOG_FLAG_MODACTION);
 
 						$ok = $con->completeTrans();
 						if($ok) good();
@@ -268,15 +271,14 @@ switch($urlparts[1]) {
 							WHERE m.modId = ?;
 						SQL, [$modId]);
 
-						// have to get rid of the images for size reasons.
-						//TODO(Rennorb) @cleanup @correctness: This should just get replaced with delta detection (kinda).
-						function stripImageForChangelog($html)
-						{
-							return preg_replace('#src="data:image/png;base64,.*?"#', 'src="x"', $html); //TODO(Rennorb): @perf
+						$logFlags = canModerate(null, $user) ? AUDIT_LOG_FLAG_MODACTION : 0; // @correctness: this needs to filter out team members.
+						if(!$prevData['retractionReason']) {
+							logAuditEvent(AUDIT_LOG_KIND_RELEASE_RETRACT, $releaseId, $reasonHtml, $logFlags);
 						}
-
-						$log = !$prevData['retractionReason'] ? 'Retracted release.' : 'Changed retraction reason. Previous was: '.stripImageForChangelog($prevData['retractionReason']);
-						logAssetChanges([$log], $prevData['assetId']);
+						else {
+							$diff = createAuditLogDiff($prevData['retractionReason'], $reasonHtml);
+							logAuditEvent(AUDIT_LOG_KIND_RELEASE_CHANGE_RETRACTION, $releaseId, $diff, $logFlags);
+						}
 
 						$ok = $con->completeTrans();
 						if($ok) good();
@@ -347,10 +349,10 @@ switch($urlparts[1]) {
 					vote = VALUES(vote)
 			SQL); // @security: All of these values are filtered to be integers, and therefore sql inert.
 
-			$newTagIds = array_diff($allAddedTagIds, $tagsThatAreAlreadyOnThisMod);
-			if(!empty($newTagIds)) {
-				$newTagNames = array_map(fn($t) => $t['name'], array_intersect_key($response, array_flip($newTagIds)));
-				logAssetChanges(['Added '.formatGrammaticallyCorrectEnumeration(array_values($newTagNames)).' as tags to the mod.'], $con->getOne("SELECT assetId FROM mods WHERE modId = $modId"));
+			if(count($allAddedTagIds) !== count($tagsThatAreAlreadyOnThisMod)) {
+				$old = formatGrammaticallyCorrectEnumeration(array_column(array_intersect_key($response, array_flip($tagsThatAreAlreadyOnThisMod)), 'name'));
+				$new = formatGrammaticallyCorrectEnumeration(array_column($response, 'name'));
+				logAuditEvent(AUDIT_LOG_KIND_MOD_CHANGE_TAGS, $modId, createAuditLogDiff($old, $new));
 			}
 
 			$ok = $con->completeTrans();

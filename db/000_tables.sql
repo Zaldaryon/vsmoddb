@@ -177,6 +177,19 @@ CREATE TABLE IF NOT EXISTS `changelogs` (
 )
 ENGINE = InnoDB;
 
+CREATE TABLE IF NOT EXISTS `auditLogs` (
+	`logId`            INT  UNSIGNED NOT NULL AUTO_INCREMENT,
+	`kind`             INT1 UNSIGNED NOT NULL,
+  `flags`            INT1 UNSIGNED NOT NULL,
+	`referenceId`      INT           NOT NULL,
+	`initiatorUserId`  INT           NOT NULL,
+	`info`             TEXT CHARACTER SET 'utf8mb4' NULL,
+	`created`          DATETIME      NOT NULL DEFAULT NOW(),
+	PRIMARY KEY (logId),
+	INDEX `referenced` (referenceId, kind)
+)
+ENGINE = InnoDB;
+
 CREATE TABLE IF NOT EXISTS `tags` (
   `tagId`        INT          NOT NULL AUTO_INCREMENT,
   `kind`         TINYINT      NOT NULL,

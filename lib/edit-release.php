@@ -28,17 +28,17 @@ function createNewRelease($mod, $newData, $newCompatibleGameVersions, $file)
 		$con->execute('UPDATE files SET assetId = ? WHERE fileId = ?', [$assetId, $file['fileId']]);
 	}
 
-	$changeToLog = 'Created new release v'.formatSemanticVersion($newData['version']);
+	$logInfo = 'v'.formatSemanticVersion($newData['version']);
 
 	if(($mod['category'] & CATEGORY__MASK) === CATEGORY_GAME_MOD) {
 		$folded = implode(',', array_map(fn($v) => "($releaseId, $v)", $newCompatibleGameVersions));
 		// @security: Version numbers and releaseIds are numeric and therefore SQL Inert.
 		$con->execute("INSERT INTO modReleaseCompatibleGameVersions (releaseId, gameVersion) VALUES $folded");
 
-		$changeToLog .= " for {$newData['identifier']} with compatible game versions ".formatGrammaticallyCorrectEnumeration(array_map('formatSemanticVersion', $newCompatibleGameVersions));
+		$logInfo .= " for {$newData['identifier']} with compatible game versions ".formatGrammaticallyCorrectEnumeration(array_map('formatSemanticVersion', $newCompatibleGameVersions));
 	}
 
-	logAssetChanges([$changeToLog], $assetId);
+	logAuditEvent(AUDIT_LOG_KIND_RELEASE_CREATE, $mod['modId'], $logInfo);
 
 	updateGameVersionsCached($mod['modId']);
 	$con->execute('UPDATE mods set lastReleased = NOW() WHERE modId = ?', [$mod['modId']]);
@@ -80,6 +80,7 @@ function updateRelease($mod, $existingRelease, $newData, $newCompatibleGameVersi
 
 	$ok = true;
 	if($actualChanges || $compatibleGameVersionsChange) {
+		$releaseId = intval($existingRelease['releaseId']);
 		$changesToLog = [];
 
 		$con->startTrans();
@@ -89,7 +90,7 @@ function updateRelease($mod, $existingRelease, $newData, $newCompatibleGameVersi
 				[$actualChanges['text'], $user['userId'], $existingRelease['assetId']]
 			);
 
-			$changesToLog[] = 'Updated description.';
+			array_push($changesToLog, AUDIT_LOG_KIND_RELEASE_CHANGE_CHANGELOG, createAuditLogDiff($existingRelease['text'], $actualChanges['text']));
 		}
 		if(isset($actualChanges['identifier']) || isset($actualChanges['version'])) {
 			$con->execute('UPDATE modReleases SET identifier = ?, version = ? WHERE releaseId = ?', [
@@ -98,33 +99,29 @@ function updateRelease($mod, $existingRelease, $newData, $newCompatibleGameVersi
 				$existingRelease['releaseId']],
 			);
 
-			if(isset($actualChanges['identifier'])) $changesToLog[] = "Updated identifier: {$existingRelease['identifier']} -> {$actualChanges['identifier']}.";
-			if(isset($actualChanges['version'])) $changesToLog[] = 'Updated version: '.formatSemanticVersion($existingRelease['version']).' -> '.formatSemanticVersion($actualChanges['version']).'.';
+			if(isset($actualChanges['identifier']))
+				array_push($changesToLog, AUDIT_LOG_KIND_RELEASE_CHANGE_IDENTIFIER, createAuditLogDiff($existingRelease['identifier'], $actualChanges['identifier']));
+			if(isset($actualChanges['version'])) 
+				array_push($changesToLog, AUDIT_LOG_KIND_RELEASE_CHANGE_VERSION, createAuditLogDiff(formatSemanticVersion($existingRelease['version']), formatSemanticVersion($actualChanges['version'])));
 		}
 
 		if($compatibleGameVersionsChange) {
-			$releaseId = intval($existingRelease['releaseId']);
 			$folded = implode(',', array_map(fn($v) => "($releaseId, $v)", $newCompatibleGameVersions));
 
 			$con->execute('DELETE FROM modReleaseCompatibleGameVersions WHERE releaseId = ?', [$releaseId]);
 			// @security: Version numbers and releaseIds are numeric and therefore SQL Inert.
 			$con->execute("INSERT INTO modReleaseCompatibleGameVersions (releaseId, gameVersion) VALUES $folded");
 
-			$removedCompat = array_values(array_diff($oldCompatibleGameVersions, $newCompatibleGameVersions));
-			$addedCompat = array_values(array_diff($newCompatibleGameVersions, $oldCompatibleGameVersions));
-
-			$change = 'Modified game version compat: ';
-			if($removedCompat) $change .= 'removed '.formatGrammaticallyCorrectEnumeration(array_map('formatSemanticVersion', $removedCompat));
-			if($addedCompat) {
-				if($removedCompat) $change .= ', ';
-				$change .= 'added '.formatGrammaticallyCorrectEnumeration(array_map('formatSemanticVersion', $addedCompat));
-			}
-			$changesToLog[] = $change;
+			$old = formatGrammaticallyCorrectEnumeration(array_map('formatSemanticVersion', $oldCompatibleGameVersions));
+			$new = formatGrammaticallyCorrectEnumeration(array_map('formatSemanticVersion', $newCompatibleGameVersions));
+			array_push($changesToLog, AUDIT_LOG_KIND_RELEASE_CHANGE_COMPAT, createAuditLogDiff($old, $new));
 		}
 
 		$con->execute('UPDATE assets SET numSaved = numSaved + 1, editedByUserId = ? WHERE assetId = ?', [$user['userId'], $existingRelease['assetId']]);
 
-		logAssetChanges($changesToLog, $existingRelease['assetId']);
+		$logFlags = canModerate(null, $user) ? AUDIT_LOG_FLAG_MODACTION : 0; // @correctness this check needs to filter out team members.
+		$logPlaceholders = substr(str_repeat("({$logFlags}, {$releaseId}, {$user['userId']}, ?, ?),", count($changesToLog) / 2), 0, -1);
+		$con->execute('INSERT INTO auditLogs (flags, referenceId, initiatorUserId, kind, info) VALUES '.$logPlaceholders, $changesToLog);
 
 		updateGameVersionsCached($mod['modId']);
 		$con->execute('UPDATE mods set lastReleased = NOW() WHERE modId = ?', [$mod['modId']]);

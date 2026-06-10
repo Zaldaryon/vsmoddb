@@ -379,35 +379,95 @@ function verifyPasswordHash($password, $hash)
 // :LegacyModLogos
 const SQL_MOD_CARD_TRANSITION_DATE = "2025-03-10 15:50:00";
 
+const AUDIT_LOG_KIND_LEGACY                     =  0;
+const AUDIT_LOG_KIND_MOD_CREATE                 =  1;
+const AUDIT_LOG_KIND_MOD_DELETE                 =  2;
+const AUDIT_LOG_KIND_MOD_CHANGE_NAME            =  3;
+const AUDIT_LOG_KIND_MOD_CHANGE_SUMMARY         =  4;
+const AUDIT_LOG_KIND_MOD_CHANGE_DESCRIPTION     =  5;
+const AUDIT_LOG_KIND_MOD_CHANGE_URL_ALIAS       =  6;
+const AUDIT_LOG_KIND_MOD_CHANGE_TAGS            =  7;
+const AUDIT_LOG_KIND_MOD_CHANGE_IMAGES          =  8;
+const AUDIT_LOG_KIND_MOD_CHANGE_THUMBNAIL       =  9;
+const AUDIT_LOG_KIND_MOD_CHANGE_THUMBNAIL_WEB   = 10;
+const AUDIT_LOG_KIND_MOD_CHANGE_OWNER_INITIATED = 11;
+const AUDIT_LOG_KIND_MOD_CHANGE_OWNER_RESOLVED  = 12;
+const AUDIT_LOG_KIND_MOD_CHANGE_STATUS          = 13;
+const AUDIT_LOG_KIND_MOD_CHANGE_UPLOAD_LIMIT    = 14;
+const AUDIT_LOG_KIND_MOD_CHANGE_LINK            = 15;
+const AUDIT_LOG_KIND_MOD_CHANGE_CATEGORY        = 16;
+//...
+const AUDIT_LOG_KIND_MOD_MEMBER_INVITE_INITIATED   = 20;
+const AUDIT_LOG_KIND_MOD_MEMBER_INVITE_CHANGED     = 21;
+const AUDIT_LOG_KIND_MOD_MEMBER_INVITE_RESOLVED    = 22;
+const AUDIT_LOG_KIND_MOD_MEMBER_PERMISSION_CHANGED = 23;
+const AUDIT_LOG_KIND_MOD_MEMBER_REMOVED            = 24;
+//...
+const AUDIT_LOG_KIND_RELEASE_CREATE             = 25;
+const AUDIT_LOG_KIND_RELEASE_RETRACT            = 26;
+const AUDIT_LOG_KIND_RELEASE_CHANGE_IDENTIFIER  = 27;
+const AUDIT_LOG_KIND_RELEASE_CHANGE_VERSION     = 28;
+const AUDIT_LOG_KIND_RELEASE_CHANGE_COMPAT      = 29;
+const AUDIT_LOG_KIND_RELEASE_CHANGE_FILE        = 30;
+const AUDIT_LOG_KIND_RELEASE_CHANGE_CHANGELOG   = 31;
+const AUDIT_LOG_KIND_RELEASE_CHANGE_RETRACTION  = 32;
+//...
+const AUDIT_LOG_KIND_COMMENT_CREATE      = 40;
+const AUDIT_LOG_KIND_COMMENT_DELETE      = 41;
+const AUDIT_LOG_KIND_COMMENT_EDIT        = 42;
+//...
+const AUDIT_LOG_KIND_USER_CHANGE_BIO     = 50;
+//...
+const AUDIT_LOG_KIND_USER_WARN           = 55;
+const AUDIT_LOG_KIND_USER_BAN            = 56;
+const AUDIT_LOG_KIND_USER_REDEEM         = 57;
+//...
+const AUDIT_LOG_KIND_FILE_CREATE        = 65;
+const AUDIT_LOG_KIND_FILE_DELETE        = 66;
+
+// general:
+const AUDIT_LOG_FLAG_MODACTION             = 1 << 0; // moderator initiated actions hide the specific moderator for normal users.
+// Invitations can be accepted rejected or aborted:
+const AUDIT_LOG_FLAG_ACCEPTED              = 0b00 << 1;
+const AUDIT_LOG_FLAG_REJECTED              = 0b01 << 1;
+const AUDIT_LOG_FLAG_ABORTED               = 0b10 << 1;
+const AUDIT_LOG_FLAGS_RESOLUTION_MASK      = 0b11 << 1;
+// invites:
+const AUDIT_LOG_FLAG_WITH_EDIT_PERMISSIONS = 1 << 7;
+// mod link change:
+const AUDIT_LOG_FLAG_LINK_CHANGE_HOMEPAGE = 0b000 << 5;
+const AUDIT_LOG_FLAG_LINK_CHANGE_SOURCE   = 0b001 << 5;
+const AUDIT_LOG_FLAG_LINK_CHANGE_TRAILER  = 0b010 << 5;
+const AUDIT_LOG_FLAG_LINK_CHANGE_ISSUES   = 0b011 << 5;
+const AUDIT_LOG_FLAG_LINK_CHANGE_WIKI     = 0b100 << 5;
+const AUDIT_LOG_FLAG_LINK_CHANGE_DONATE   = 0b101 << 5;
+const AUDIT_LOG_FLAGS_MASK_LINK_CHANGES   = 0b111 << 5;
+
+
 /**
- * @param string[] $changes
- * @param int $assetId
+ * @param int $kind AUDIT_LOG kind
+ * @param int $referenceId the id of the entry in the relevant table this this log entry is referencing
+ * @param string|null $info
  */
-function logAssetChanges($changes, $assetId)
+function logAuditEvent($kind, $referenceId, $info = null, $flags = 0)
 {
-	if (empty($changes)) return;
 	global $con, $user;
 
-	$changes = implode("\r\n", $changes);
+	$con->execute('INSERT INTO auditLogs (kind, flags, referenceId, initiatorUserId, info) VALUES (?, ?, ?, ?, ?)',
+		[$kind, $flags, $referenceId, $user['userId'], $info]
+	);
+}
 
-	$activeChangeId = $con->getOne(<<<SQL
-		SELECT changelogId
-		FROM changelogs
-		WHERE userId = ? AND assetId = ? AND lastModified >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)
-		ORDER BY created DESC
-		LIMIT 1
-	SQL, [$user['userId'], $assetId]);
-
-	if ($activeChangeId) {
-		$con->execute("UPDATE changelogs SET text = CONCAT(?, '\n\r', text) WHERE changelogId = ?",
-			[$changes, $activeChangeId]
-		);
-	}
-	else {
-		$con->execute('INSERT INTO changelogs (assetId, userId, text) VALUES (?, ?, ?)',
-			[$assetId, $user["userId"], $changes]
-		);
-	}
+/**
+ * @param string $old
+ * @param string $new
+ * @return string
+ */
+function createAuditLogDiff($old, $new)
+{
+	$diff = xdiff_string_diff($old, $new, 1, true);
+	$diff = str_replace("\\ No newline at end of file\n", '', $diff);
+	return $diff;
 }
 
 
@@ -456,24 +516,6 @@ function logModeratorAction($targetUserId, $moderatorUserId, $kind, $recordId, $
 		[$targetUserId, $moderatorUserId, $kind, $recordId, $until, $reason]
 	);
 	return $con->Insert_ID();
-}
-
-
-function logError($str)
-{
-	logLine($str, "logs/error.txt");
-}
-
-
-function logLine($str, $debugfile)
-{
-	if (!is_writable($debugfile) || !file_exists($debugfile)) {
-		return;
-	}
-
-	$fp = fopen($debugfile, 'a');
-	fwrite($fp, date('d.m.Y H:i:s: ') . $str . "\n");
-	fclose($fp);
 }
 
 
@@ -1066,6 +1108,22 @@ const CATEGORY_EXTERNAL_TOOL = 2;
 const CATEGORY_OTHER         = 3;
 const CATEGORY_SERVER_TWEAK  = CATEGORY_GAME_MOD | (1 << 7);
 
+
+/**
+ * @param int $category
+ * @return string
+ */
+function stringifyCategory($category)
+{
+	switch($category) {
+		case CATEGORY_GAME_MOD:      return 'Mod';
+		case CATEGORY_EXTERNAL_TOOL: return 'External Tool';
+		case CATEGORY_OTHER:         return 'Other';
+		case CATEGORY_SERVER_TWEAK:  return 'Server Tweak';
+		default: return strval($category);
+	}
+}
+
 const ASSETTYPE_MOD = 1;
 const ASSETTYPE_RELEASE = 2;
 
@@ -1073,6 +1131,20 @@ const STATUS_DRAFT = 1;
 const STATUS_RELEASED = 2;
 const STATUS_3 = 3;
 const STATUS_LOCKED = 4;
+
+/**
+ * @param int $status
+ * @return string
+ */
+function stringifyStatus($status)
+{
+	switch($status) {
+		case STATUS_DRAFT:    return 'Draft';
+		case STATUS_RELEASED: return 'Releasesd';
+		case STATUS_LOCKED:   return 'Locked';
+		default: return strval($status);
+	}
+}
 
 
 if(!defined('INPUT_REQUEST')) define('INPUT_REQUEST', 99);

@@ -89,6 +89,7 @@ else { // New mod
 		'embedLogoFileId' => null,
 		'tags'            => [],
 		'uploadLimitOverwrite' => null,
+		'created'         => date(SQL_DATE_FORMAT),
 	];
 	$canEditAsOwner = true;
 	$currentlyBeingTransferredTo = [];
@@ -475,7 +476,7 @@ else if(!empty($_POST["delete"])) {
 // Check revokenewownership first because its lumped in with the other fields, including submit=1:
 if(isset($_POST['revokenewownership'])) {
 	if(count($messages /* global */) === $oldMsgCount) { // no errors occurred
-		revokeModOwnershipTransfer($mod['assetId'], $currentlyBeingTransferredTo['notificationId']);
+		revokeModOwnershipTransfer($mod['modId'], $currentlyBeingTransferredTo['notificationId']);
 
 		//NOTE(Rennorb): This cannot just use the current path, as saving a new mod will go from 
 		// /edit/mod  to /edit/mod/?assetid=xyz . In that case the cookie would not be deleted after showing the message, as 

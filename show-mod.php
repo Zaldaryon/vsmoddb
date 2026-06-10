@@ -362,19 +362,28 @@ function processTeamInvitation($asset, $user)
 	switch ($_POST['acceptteaminvite']) {
 		case 1:
 			$canEdit = (intval($invite['recordId']) & (1 << 30)) ? 1 : 0; // :InviteEditBit
+
+			$con->startTrans();
+
 			$con->Execute('INSERT INTO modTeamMembers (modId, userId, canEdit) values (?, ?, ?)', [$asset['modId'], $user['userId'], $canEdit]);
 
 			$con->Execute('UPDATE notifications SET `read` = 1 WHERE notificationId = ?', [$invite['notificationId']]);
 
-			logAssetChanges([$user['name'].' acepted team invitation'], $asset['assetId']);
+			logAuditEvent(AUDIT_LOG_KIND_MOD_MEMBER_INVITE_RESOLVED, $asset['modId'], null, AUDIT_LOG_FLAG_ACCEPTED);
+
+			$con->completeTrans();
 
 			forceRedirectAfterPOST();
 			exit();
 
 		case 0:
+			$con->startTrans();
+
 			$con->Execute('UPDATE notifications SET `read` = 1 WHERE notificationId = ?', [$invite['notificationId']]);
 
-			logAssetChanges([$user['name'].' rejected team invitation'], $asset['assetId']);
+			logAuditEvent(AUDIT_LOG_KIND_MOD_MEMBER_INVITE_RESOLVED, $asset['modId'], null, AUDIT_LOG_FLAG_REJECTED);
+
+			$con->completeTrans();
 
 			forceRedirectAfterPOST();
 			exit();
@@ -417,7 +426,7 @@ function processOwnershipTransfer($asset, $user)
 			// Use the 31st bit of the modId to indicate success :PackedTransferSuccess
 			$con->execute('INSERT INTO notifications (kind, userId, recordId) VALUES ('.NOTIFICATION_MOD_OWNERSHIP_TRANSFER_RESOLVED.', ?, ?) ', [$asset['createdByUserId'], $asset['modId'] | (1 << 30)]);
 
-			logAssetChanges(['Ownership migrated to '.$user['name']], $asset['assetId']);
+			logAuditEvent(AUDIT_LOG_KIND_MOD_CHANGE_OWNER_RESOLVED, $asset['modId'], null, AUDIT_LOG_FLAG_ACCEPTED);
 
 			$con->completeTrans();
 
@@ -432,7 +441,7 @@ function processOwnershipTransfer($asset, $user)
 			// Send notification to the original author:
 			$con->execute('INSERT INTO notifications (kind, userId, recordId) VALUES ('.NOTIFICATION_MOD_OWNERSHIP_TRANSFER_RESOLVED.', ?, ?) ', [$asset['createdByUserId'], $asset['modId'] | (0 << 30)]); // :PackedTransferSuccess
 
-			logAssetChanges(['Ownership migration rejected by '.$user['name']], $asset['assetId']);
+			logAuditEvent(AUDIT_LOG_KIND_MOD_CHANGE_OWNER_RESOLVED, $asset['modId'], null, AUDIT_LOG_FLAG_REJECTED);
 
 			$con->completeTrans();
 

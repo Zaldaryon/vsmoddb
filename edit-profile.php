@@ -4,7 +4,7 @@ if(DB_READONLY) showReadonlyPage();
 $userHash = $urlparts[2] ?? null;
 if(empty($userHash)) showErrorPage(HTTP_BAD_REQUEST, 'Missing user hash.');
 
-$shownUser = getUserByHash($userHash, $con);
+$shownUser = getUserByHash($userHash);
 if (empty($shownUser)) showErrorPage(HTTP_NOT_FOUND, 'User not found.');
 
 if (!canEditProfile($shownUser, $user)) showErrorPage(HTTP_FORBIDDEN);
@@ -12,16 +12,24 @@ if (!canEditProfile($shownUser, $user)) showErrorPage(HTTP_FORBIDDEN);
 if (!empty($_POST['save'])) {
 	validateActionToken();
 
-	$bio = trimHtml(sanitizeHtml($_POST['bio']));
+	$old = $shownUser['bio'];
+	$new = trimHtml(sanitizeHtml($_POST['bio']));
 
-	$ok = $con->execute('UPDATE users SET bio = ? WHERE userId = ?', [$bio, $shownUser['userId']]);
+	$diff = createAuditLogDiff($old, $new);
+	if(!$diff) {
+		forceRedirectAfterPOST();
+		exit();
+	}
+
+	$con->startTrans();
+
+	$con->execute('UPDATE users SET bio = ? WHERE userId = ?', [$new, $shownUser['userId']]);
+
+	$logFlags = $shownUser['userId'] == $user['userId'] ? 0 : AUDIT_LOG_FLAG_MODACTION;
+	logAuditEvent(AUDIT_LOG_KIND_USER_CHANGE_BIO, $diff, $logFlags);
+
+	$ok = $con->completeTrans();
 	if ($ok) {
-		// addMessage(MSG_CLASS_OK, 'New profile information saved.');
-
-		if($shownUser['userId'] == $user['userId']) $log = 'Changed their profile bio.';
-		else $log = "Changed #{$shownUser['userId']} ({$shownUser['name']})s profile bio.";
-		logAssetChanges([$log], null);
-		
 		forceRedirectAfterPOST();
 		exit();
 	}

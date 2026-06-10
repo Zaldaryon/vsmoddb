@@ -298,6 +298,6 @@ class ErrorHandler {
 			"Line: " . $e->getLine() . "\n" .
 			"Stack Trace: " . $e->getTraceAsString() . "\n";
 
-		logError($severity . ": " . $text);
+		error_log(date('d.m.Y H:i:s: ') . $severity . ": " . $text, 0);
 	}
 }

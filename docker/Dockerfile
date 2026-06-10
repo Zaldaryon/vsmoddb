@@ -8,10 +8,21 @@ ENV GID=${GID}
 
 # Install php-mysql driver & gd to handle screenshots
 RUN apt update \
-    && apt install -y zlib1g-dev libpng-dev libjpeg62-turbo-dev \
-    && rm -rf /var/lib/apt/lists/*
+    && apt install -y zlib1g-dev libpng-dev libjpeg62-turbo-dev
+# Manual isntall because we don't appear to have libxdiff in the repos:
+RUN curl -sSLf -o /tmp/libxdef.tag.gz http://www.xmailserver.org/libxdiff-0.23.tar.gz \
+	&& mkdir /tmp/libxdef \
+	&& cd /tmp/libxdef/ \
+	&& tar -xzf /tmp/libxdef.tag.gz \
+	&& unlink /tmp/libxdef.tag.gz \
+	&& cd libxdiff-0.23 \
+	&& ./configure --disable-shared --disable-dependency-tracking --with-pic \
+	&& make && make install \
+    && pecl install xdiff
+RUN rm -rf /var/lib/apt/lists/*
 RUN docker-php-ext-configure gd --with-jpeg \
-    && docker-php-ext-install mysqli pdo pdo_mysql gd
+    && docker-php-ext-install mysqli pdo pdo_mysql gd \
+    && docker-php-ext-enable xdiff
 
 RUN usermod -u ${UID} www-data \
     && groupmod -g ${GID} www-data

@@ -132,7 +132,7 @@ function processFileUpload($file, $assetTypeId, $parentAssetId, $parentModId) {
 		$con->execute("INSERT INTO fileImageData (fileId, hasThumbnail, size) VALUES (?, 1, POINT(?, ?))", [$fileId, $width, $height]);
 	}
 
-	if($parentAssetId) logAssetChanges(array("Uploaded file '{$file['name']}'"), $parentAssetId);
+	if($parentAssetId) logAuditEvent(AUDIT_LOG_KIND_FILE_CREATE, $parentAssetId);
 		
 	$data = array(
 		"status" => "ok",

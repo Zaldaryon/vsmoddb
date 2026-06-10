@@ -33,7 +33,7 @@ function createNewMod($mod, $filesInOrder, $newMembers, $newEditorMemberHashes)
 		$mod['summary'], textContent($mod['text']), $mod['side'], $mod['category']
 	]);
 	$modId = intval($con->Insert_ID());
-	logAssetChanges(["Created mod '{$mod['name']}'"], $assetId);
+	logAuditEvent(AUDIT_LOG_KIND_MOD_CREATE, $modId);
 
 	// Attach hovering files to this mod. Needs to be done for new mods, as it cannot happen during upload because at that point the asset doesn't yet exist to have files attached to it.
 	// Not that the attaching should happen during upload in the first place...
@@ -41,8 +41,7 @@ function createNewMod($mod, $filesInOrder, $newMembers, $newEditorMemberHashes)
 		$con->execute("UPDATE files SET assetId = ?, `order` = ? WHERE fileId = ?", [$assetId, $i, $file['fileId']]);
 	}
 
-	$tagsChangelog = updateModTags($modId, [], array_keys($mod['tags'])); // @perf: This could use a simpler path
-	logAssetChanges($tagsChangelog, $assetId);
+	updateModTags($modId, [], array_keys($mod['tags'])); // @perf: This could use a simpler path
 
 	updateModTeamMembers(['modId' => $modId, 'assetId' => $assetId], $newMembers, $newEditorMemberHashes);
 
@@ -59,6 +58,8 @@ function updateMod($oldModData, $mod, $filesInOrder, $newMembers, $newEditorMemb
 {
 	global $con, $user;
 
+	$modId = intval($mod['modId']);
+
 	$con->startTrans();
 	
 	$con->execute(
@@ -70,17 +71,36 @@ function updateMod($oldModData, $mod, $filesInOrder, $newMembers, $newEditorMemb
 		SET urlAlias = ?, cardLogoFileId = ?, embedLogoFileId = ?, 
 			homepageUrl = ?, sourceCodeUrl = ?, trailerVideoUrl = ?, issueTrackerUrl = ?, wikiUrl = ?, donateUrl = ?,
 			summary = ?, descriptionSearchable = ?, side = ?, category = ?
-		WHERE modId = ?
+		WHERE modId = $modId
 	SQL, [
 		$mod['urlAlias'], $mod['cardLogoFileId'], $mod['embedLogoFileId'],
 		$mod['homepageUrl'], $mod['sourceCodeUrl'], $mod['trailerVideoUrl'], $mod['issueTrackerUrl'], $mod['wikiUrl'], $mod['donateUrl'],
 		$mod['summary'], textContent($mod['text']), $mod['side'], $mod['category'],
-		$mod['modId']
 	]);
-	logAssetChanges(["Modified mod '{$mod['name']}'"], $mod['assetId']);
+
+	$logFlagsGeneral = canModerate(null, $user) ? AUDIT_LOG_FLAG_MODACTION : 0; // @correctness: filter out team members.
+	$logValues = [];
+	if($diff = createAuditLogDiff($oldModData['urlAlias'], $mod['urlAlias'])) array_push($logValues, AUDIT_LOG_KIND_MOD_CHANGE_URL_ALIAS, $diff, $logFlagsGeneral);
+	if($oldModData['cardLogoFileId'] != $mod['cardLogoFileId']) array_push($logValues, AUDIT_LOG_KIND_MOD_CHANGE_THUMBNAIL, $logFlagsGeneral);
+	if($oldModData['embedLogoFileId'] != $mod['embedLogoFileId']) array_push($logValues, AUDIT_LOG_KIND_MOD_CHANGE_THUMBNAIL_WEB, $logFlagsGeneral);
+	if($diff = createAuditLogDiff($oldModData['homepageUrl'], $mod['homepageUrl'])) array_push($logValues, AUDIT_LOG_KIND_MOD_CHANGE_LINK, $diff, AUDIT_LOG_FLAG_LINK_CHANGE_HOMEPAGE | $logFlagsGeneral);
+	if($diff = createAuditLogDiff($oldModData['sourceCodeUrl'], $mod['sourceCodeUrl'])) array_push($logValues, AUDIT_LOG_KIND_MOD_CHANGE_LINK, $diff, AUDIT_LOG_FLAG_LINK_CHANGE_SOURCE | $logFlagsGeneral);
+	if($diff = createAuditLogDiff($oldModData['trailerVideoUrl'], $mod['trailerVideoUrl'])) array_push($logValues, AUDIT_LOG_KIND_MOD_CHANGE_LINK, $diff, AUDIT_LOG_FLAG_LINK_CHANGE_TRAILER | $logFlagsGeneral);
+	if($diff = createAuditLogDiff($oldModData['issueTrackerUrl'], $mod['issueTrackerUrl'])) array_push($logValues, AUDIT_LOG_KIND_MOD_CHANGE_LINK, $diff, AUDIT_LOG_FLAG_LINK_CHANGE_ISSUES | $logFlagsGeneral);
+	if($diff = createAuditLogDiff($oldModData['wikiUrl'], $mod['wikiUrl'])) array_push($logValues, AUDIT_LOG_KIND_MOD_CHANGE_LINK, $diff, AUDIT_LOG_FLAG_LINK_CHANGE_WIKI | $logFlagsGeneral);
+	if($diff = createAuditLogDiff($oldModData['donateUrl'], $mod['donateUrl'])) array_push($logValues, AUDIT_LOG_KIND_MOD_CHANGE_LINK, $diff, AUDIT_LOG_FLAG_LINK_CHANGE_DONATE | $logFlagsGeneral);
+	if($diff = createAuditLogDiff($oldModData['summary'], $mod['summary'])) array_push($logValues, AUDIT_LOG_KIND_MOD_CHANGE_SUMMARY, $diff, $logFlagsGeneral);
+	if($diff = createAuditLogDiff($oldModData['text'], $mod['text'])) array_push($logValues, AUDIT_LOG_KIND_MOD_CHANGE_DESCRIPTION, $diff, $logFlagsGeneral);
+	if($oldModData['category'] != $mod['category']) array_push($logValues, AUDIT_LOG_KIND_MOD_CHANGE_CATEGORY, createAuditLogDiff(stringifyCategory($oldModData['category']), stringifyCategory($mod['category'])), $logFlagsGeneral);
+	if($oldModData['statusId'] != $mod['statusId']) array_push($logValues, AUDIT_LOG_KIND_MOD_CHANGE_CATEGORY, createAuditLogDiff(stringifyStatus($oldModData['status']), stringifyStatus($mod['status'])), $logFlagsGeneral);
+
+	if($logValues) {
+		$logPlaceholders = substr(str_repeat("({$modId}, {$user['userId']}, ?, ?, ?),", count($logValues) / 3), 0, -1);
+		$con->execute('INSERT INTO auditLogs (referenceId, initiatorUserId, kind, info, flags) VALUES '.$logPlaceholders, $logValues);
+	}
+
 
 	if($oldModData['statusId'] == STATUS_LOCKED) {
-		$modId = intval($mod['modId']);
 		if($mod['statusId'] != STATUS_LOCKED) {
 			// Send unlock notification to the modder:
 			$con->execute("INSERT INTO notifications (kind, recordId, userId) values (?, ?, ?)", [NOTIFICATION_MOD_UNLOCKED, $modId, $mod['createdByUserId']]);
@@ -102,8 +122,7 @@ function updateMod($oldModData, $mod, $filesInOrder, $newMembers, $newEditorMemb
 		}
 	}
 
-	$tagsChangelog = updateModTags($mod['modId'], $oldModData['tags'], array_keys($mod['tags']));
-	logAssetChanges($tagsChangelog, $mod['assetId']);
+	updateModTags($modId, $oldModData['tags'], array_keys($mod['tags']));
 
 	foreach($filesInOrder as $i => $file) {
 		$con->execute("UPDATE files SET `order` = ? WHERE fileId = ?", [$i, $file['fileId']]);
@@ -114,8 +133,8 @@ function updateMod($oldModData, $mod, $filesInOrder, $newMembers, $newEditorMemb
 
 		if($mod['createdByUserId'] != $oldModData['createdByUserId']) {
 			// Initiate ownership transfer:
-			$con->execute('INSERT INTO notifications (kind, userId, recordId) VALUES (?, ?, ?)', [NOTIFICATION_MOD_OWNERSHIP_TRANSFER_REQUEST, $mod['createdByUserId'], $mod['modId']]);
-			logAssetChanges(["User #{$user['userId']} initiated a ownership transfer to user #{$mod['createdByUserId']}"], $mod['assetId']);
+			$con->execute('INSERT INTO notifications (kind, userId, recordId) VALUES (?, ?, ?)', [NOTIFICATION_MOD_OWNERSHIP_TRANSFER_REQUEST, $mod['createdByUserId'], $modId]);
+			logAuditEvent(AUDIT_LOG_KIND_MOD_CHANGE_OWNER_INITIATED, $modId, "{$mod['createdByUserId']}");
 		}
 	}
 
@@ -126,48 +145,41 @@ function updateMod($oldModData, $mod, $filesInOrder, $newMembers, $newEditorMemb
  * @param int $modId
  * @param array<int, array{name:string, color:string}> $oldTags
  * @param array<int> $newTagIds
- * @return array<string> changelog
  */
 function updateModTags($modId, $oldTags, $newTagsIds)
 {
 	global $con, $user;
 
-	$changes = [];
+	$oldNames = array_column($oldTags, 'name'); sort($oldNames);
+	if($newTagsIds) {
+		$idsFolded = implode(',', array_map('intval', $newTagsIds));
+		$newNames = $con->getCol("SELECT name FROM tags WHERE tagId IN ($idsFolded) ORDER BY name ASC");
+		$logNew = formatGrammaticallyCorrectEnumeration($newNames);
+	}
+	else {
+		$logNew = '';
+	}
+	$diff = createAuditLogDiff(formatGrammaticallyCorrectEnumeration($oldNames), $logNew);
+	if(!$diff) return;
 
-	if (!empty($newTagsIds)) {
-		$addedNamesFolded = '';
+	foreach ($newTagsIds as $tagId) {
+		if(!array_key_exists($tagId, $oldTags)) {
+			$con->execute(<<<SQL
+				INSERT INTO modTags (modId, tagId, votes)
+					VALUES (?, ?, ?)
+				ON DUPLICATE KEY UPDATE
+					votes = votes + VALUES(votes)
+			SQL, [$modId, $tagId, TAG_MODAUTHOR_VOTES]);
 
-		foreach ($newTagsIds as $tagId) {
-			$tag = $oldTags[$tagId] ?? null;
-
-			if($tag === null) {
-				$con->execute(<<<SQL
-					INSERT INTO modTags (modId, tagId, votes)
-						VALUES (?, ?, ?)
-					ON DUPLICATE KEY UPDATE
-						votes = votes + VALUES(votes)
-				SQL, [$modId, $tagId, TAG_MODAUTHOR_VOTES]);
-
-				$con->execute(<<<SQL
-					INSERT INTO modTagVotes (modId, tagId, userId, vote)
-						VALUES (?, ?, ?, ?)
-					ON DUPLICATE KEY UPDATE
-						vote = VALUES(vote)
-				SQL, [$modId, $tagId, $user['userId'], TAG_MODAUTHOR_VOTES]);
-
-				$tag = $con->getRow('SELECT name FROM tags WHERE tagId = ?', [$tagId]);
-
-				if ($addedNamesFolded) $addedNamesFolded .= "', '";
-				$addedNamesFolded .= $tag['name'];
-			}
-			else {
-				unset($oldTags[$tagId]);
-			}
+			$con->execute(<<<SQL
+				INSERT INTO modTagVotes (modId, tagId, userId, vote)
+					VALUES (?, ?, ?, ?)
+				ON DUPLICATE KEY UPDATE
+					vote = VALUES(vote)
+			SQL, [$modId, $tagId, $user['userId'], TAG_MODAUTHOR_VOTES]);
 		}
-
-		if ($addedNamesFolded) {
-			$s = str_contains($addedNamesFolded, ',') ? 's' : '';
-			$changes[] = "Added tag{$s} '$addedNamesFolded'.";
+		else {
+			unset($oldTags[$tagId]);
 		}
 	}
 
@@ -176,13 +188,10 @@ function updateModTags($modId, $oldTags, $newTagsIds)
 		// @security: $oldTags and its keys are obtained form the database, are numeric and therefore sql inert.
 		$con->Execute("DELETE FROM modTags WHERE modId = ? AND tagId IN ($removedTagIdsFolded)", [$modId]);
 		$con->Execute("DELETE FROM modTagVotes WHERE modId = ? AND tagId IN ($removedTagIdsFolded)", [$modId]);
-
-		$removedTagNamesFolded = implode("', '", array_map(fn ($t) => $t['name'], $oldTags));
-		$s = count($oldTags) !== 1 ? 's' : '';
-		$changes[] = "Deleted tag{$s} '$removedTagNamesFolded'.";
 	}
 
-	return $changes;
+	$logFlags = canModerate(null, $user) ? AUDIT_LOG_FLAG_MODACTION : 0; // @correctness: needs to ignore team members
+	logAuditEvent(AUDIT_LOG_KIND_MOD_CHANGE_TAGS, $modId, $diff, $logFlags);
 }
 
 /**
@@ -197,7 +206,8 @@ function updateModTeamMembers($mod, $newMembers, $newEditorMemberHashes)
 	$oldMembers = $con->getAll('SELECT HEX(u.hash) AS hash, t.userId, t.canEdit, t.teamMemberId FROM modTeamMembers t JOIN users u ON u.userId = t.userId WHERE t.modId = ?', [$mod['modId']]);
 	$oldMembers = array_combine(array_column($oldMembers, 'userId'), $oldMembers);
 
-	$changes = array();
+	$logCommonFlags = canModerate(null, $user) ? AUDIT_LOG_FLAG_MODACTION : 0;
+	$logValues = [];
 
 	foreach ($newMembers as $newMemberHash => $newMemberId) {
 		//NOTE(Rennorb) @hack: We use the highest possible bit (#31) to indicate that this invitation should resolve with editor permissions.
@@ -211,22 +221,18 @@ function updateModTeamMembers($mod, $newMembers, $newEditorMemberHashes)
 			if(empty($invitation)) {
 				$con->execute('INSERT INTO notifications (kind, userId, recordId) VALUES ('.NOTIFICATION_TEAM_INVITE.', ?, ?)', [$newMemberId, $mergedId]);
 
-				$changes[] = "User #{$user['userId']} invited user #{$newMemberId} to join the team".($editBit ? ' with edit permissions' : '').'.';
+				array_push($logValues, AUDIT_LOG_KIND_MOD_MEMBER_INVITE_INITIATED, "$newMemberId", ($editBit ? AUDIT_LOG_FLAG_WITH_EDIT_PERMISSIONS : 0) | $logCommonFlags);
 			}
 			else if ($invitation['recordId'] != $mergedId) {
 				$con->execute('UPDATE notifications SET recordId = ? WHERE notificationId = ?', [$mergedId, $invitation['notificationId']]);
 
-				$changes[] = $editBit
-					? "User #{$user['userId']} promoted invitation to user #{$newMemberId} to editor."
-					: "User #{$user['userId']} demoted invitation to user #{$newMemberId} to normal member.";
+				array_push($logValues, AUDIT_LOG_KIND_MOD_MEMBER_INVITE_CHANGED, "$newMemberId", ($editBit ? AUDIT_LOG_FLAG_WITH_EDIT_PERMISSIONS : 0) | $logCommonFlags);
 			}
 		}
 		else if (boolval($oldMembers[$newMemberId]['canEdit']) !== boolval($editBit)) {
 			$con->execute('UPDATE modTeamMembers SET canEdit = ? WHERE teamMemberId = ?', [$editBit ? 1 : 0, $oldMembers[$newMemberId]['teamMemberId']]);
 
-			$changes[] = $editBit
-				? "User #{$user['userId']} promoted teammember user #{$newMemberId} to editor."
-				: "User #{$user['userId']} demoted teammember user #{$newMemberId} to normal member.";
+			array_push($logValues, AUDIT_LOG_KIND_MOD_MEMBER_PERMISSION_CHANGED, "$newMemberId", ($editBit ? AUDIT_LOG_FLAG_WITH_EDIT_PERMISSIONS : 0) | $logCommonFlags);
 		}
 
 		unset($oldMembers[$newMemberId]);
@@ -234,10 +240,14 @@ function updateModTeamMembers($mod, $newMembers, $newEditorMemberHashes)
 
 	foreach ($oldMembers as $member) {
 		$con->Execute('DELETE FROM modTeamMembers WHERE teamMemberId = ?', [$member['teamMemberId']]);
-		$changes[] = "User #{$user['userId']} removed teammember user #{$member['userId']}.";
+
+		array_push($logValues, AUDIT_LOG_KIND_MOD_MEMBER_REMOVED, "{$member['userId']}", ($member['canEdit'] ? AUDIT_LOG_FLAG_WITH_EDIT_PERMISSIONS : 0) | $logCommonFlags);
 	}
 
-	logAssetChanges($changes, $mod['assetId']);
+	if($logValues) {
+		$placeholders = substr(str_repeat("({$mod['modId']}, {$user['userId']}, ?, ?, ?),", count($logValues) / 3), 0, -1);
+		$con->Execute("INSERT INTO auditLogs (referenceId, initiatorUserId, kind, info, flags) VALUES $placeholders", $logValues);
+	}
 }
 
 /** Deletes the given mod and all attached assets and releases
@@ -312,7 +322,7 @@ function deleteMod($mod)
 
 	$con->execute("DELETE FROM assets WHERE assetId = $assetId");
 
-	logAssetChanges(["Deleted mod '{$mod['name']}' and all connected assets and releases."], $assetId);
+	logAuditEvent(AUDIT_LOG_KIND_MOD_DELETE, $modId);
 
 	return $con->completeTrans();
 }
@@ -333,17 +343,17 @@ function modCurrentlyBeingTransferredTo($modId)
 }
 
 /**
- * @param int $assetID
+ * @param int $modId
  * @param int $notificationId
  */
-function revokeModOwnershipTransfer($assetId, $notificationId)
+function revokeModOwnershipTransfer($modId, $notificationId)
 {
 	global $con;
 
 	$con->startTrans();
 
 	$con->execute('UPDATE notifications SET `read` = 1 WHERE notificationId = ?', [$notificationId]);
-	logAssetchanges(['Ownership transfer aborted'], $assetId);
+	logAuditEvent(AUDIT_LOG_KIND_MOD_CHANGE_OWNER_RESOLVED, $modId, null, AUDIT_LOG_FLAG_ABORTED);
 
 	$con->completeTrans();
 }

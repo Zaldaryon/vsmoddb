@@ -34,33 +34,21 @@ switch($_SERVER['REQUEST_METHOD']) {
 
 		$commentTextShort = mb_substr(textContent($commentHtml), 0, 255); // stored for comment replies
 
-		// have to get rid of the images for size reasons.
-		//TODO(Rennorb) @cleanup @correctness: This should just get replaced with delta detection (kinda).
-		function stripImageForChangelog($html)
-		{
-			return preg_replace('#src="data:image/.*?"#', 'src="x"', $html); //TODO(Rennorb): @perf
-		}
-
-		$strippedOld = stripImageForChangelog($comment['text']);
-		$strippedNew = stripImageForChangelog($commentHtml);
+		$diff = createAuditLogDiff($comment['text'], $commentHtml);
 
 		$con->startTrans();
 
 		if($wasModAction) {
-			$changelog = "Modified someone elses comment ($strippedOld) => ($strippedNew)";
-
 			//TODO(Rennorb): Diff the strings and add the diff to the log.
 			$lastModAction = logModeratorAction($comment['userId'], $user['userId'], MODACTION_KIND_EDIT, $commentId, SQL_DATE_FOREVER, null);
 
 			$con->execute('UPDATE comments SET text = ?, textShort = ?, lastModaction = ?, contentLastModified = NOW() WHERE commentId = ?', [$commentHtml, $commentTextShort, $lastModAction, $commentId]);
 		}
 		else {
-			$changelog = "Modified their comment ($strippedOld) => ($strippedNew).";
-
 			$con->execute('UPDATE comments SET text = ?, textShort = ?, contentLastModified = NOW() WHERE commentId = ?', [$commentHtml, $commentTextShort, $commentId]);
 		}
 
-		logAssetChanges([$changelog], $comment['assetId']);
+		logAuditEvent(AUDIT_LOG_KIND_COMMENT_EDIT, $commentId, $diff, $wasModAction ? AUDIT_LOG_FLAG_MODACTION : 0);
 
 		$con->completeTrans();
 
@@ -83,6 +71,8 @@ switch($_SERVER['REQUEST_METHOD']) {
 		//TODO(Rennorb): Fine grained team member permissions to inherit this capability to certain team members.
 		if($wasModAction && !canModerate(null, $user) && $comment['modCreatedBy'] != $user['userId'])  fail(HTTP_FORBIDDEN);
 
+		$con->startTrans();
+
 		if($wasModAction) {
 			$lastModAction = logModeratorAction($comment['userId'], $user['userId'], MODACTION_KIND_DELETE, $commentId, SQL_DATE_FOREVER, null);
 	
@@ -97,11 +87,14 @@ switch($_SERVER['REQUEST_METHOD']) {
 	
 			$changelog = "User #{$user['userId']} deleted own comment #$commentId";
 		}
-		logAssetChanges([$changelog], $comment['assetId']);
-	
+
+		logAuditEvent(AUDIT_LOG_KIND_COMMENT_DELETE, $commentId, null, $wasModAction ? AUDIT_LOG_FLAG_MODACTION : 0);
+
 		// Mark notifications for this comment as read so they get hidden for the notified user.
 		//NOTE(Rennorb): We could also delete them completely, but i opted to just "read" them. Arbitrary decision.
 		$con->Execute("UPDATE notifications SET `read` = 1 WHERE kind IN (".NOTIFICATION_MENTIONED_IN_COMMENT.", ".NOTIFICATION_NEW_COMMENT.','.NOTIFICATION_RESPONDED_TO_COMMENT.") AND recordId = ?", [$commentId]);
+
+		$con->completeTrans();
 
 		good();
 
