@@ -2,7 +2,7 @@ USE `moddb`;
 
 DELIMITER $$
 
-CREATE OR REPLACE PROCEDURE upgrade_database__moderation()
+CREATE OR REPLACE PROCEDURE upgrade_database()
 BEGIN
 
 IF NOT EXISTS( (SELECT * FROM information_schema.STATISTICS WHERE TABLE_SCHEMA='moddb' AND
@@ -20,7 +20,7 @@ END IF;
 
 END $$
 
-CALL upgrade_database__moderation() $$
+CALL upgrade_database() $$
 
 DELIMITER ;
 

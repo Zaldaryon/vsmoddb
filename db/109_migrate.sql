@@ -92,8 +92,8 @@ END; $$
 
 
 
-DROP PROCEDURE IF EXISTS upgrade_database__moderation $$
-CREATE PROCEDURE upgrade_database__moderation()
+DROP PROCEDURE IF EXISTS upgrade_database $$
+CREATE PROCEDURE upgrade_database()
 BEGIN
 
 
@@ -219,7 +219,7 @@ END IF;
 
 END $$
 
-CALL upgrade_database__moderation() $$
+CALL upgrade_database() $$
 
 DROP FUNCTION compile_semantic_version $$
 DROP FUNCTION fix_semantic_version $$

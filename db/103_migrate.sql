@@ -1,7 +1,7 @@
 DELIMITER $$
 
-DROP PROCEDURE IF EXISTS upgrade_database__moderation $$
-CREATE PROCEDURE upgrade_database__moderation()
+DROP PROCEDURE IF EXISTS upgrade_database $$
+CREATE PROCEDURE upgrade_database()
 BEGIN
 
 DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -38,6 +38,6 @@ END IF;
 
 END $$
 
-CALL upgrade_database__moderation() $$
+CALL upgrade_database() $$
 
 DELIMITER ;

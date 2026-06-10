@@ -2,7 +2,7 @@ USE `moddb`;
 
 DELIMITER $$
 
-CREATE OR REPLACE PROCEDURE upgrade_database__moderation()
+CREATE OR REPLACE PROCEDURE upgrade_database()
 BEGIN
 
 
@@ -14,6 +14,6 @@ END IF;
 
 END $$
 
-CALL upgrade_database__moderation() $$
+CALL upgrade_database() $$
 
 

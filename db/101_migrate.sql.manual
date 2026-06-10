@@ -14,8 +14,8 @@ KILL connection_id();
 -- Step 1. Creating the "has thumbnail" column
 DELIMITER $$
 
-DROP PROCEDURE IF EXISTS upgrade_database__moderation $$
-CREATE PROCEDURE upgrade_database__moderation()
+DROP PROCEDURE IF EXISTS upgrade_database $$
+CREATE PROCEDURE upgrade_database()
 BEGIN
 
 IF NOT EXISTS( (SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='moddb' AND TABLE_NAME='file'
@@ -24,7 +24,7 @@ IF NOT EXISTS( (SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='mod
 END IF;
 
 END $$
-CALL upgrade_database__moderation() $$
+CALL upgrade_database() $$
 DELIMITER ;
 
 -- Step 2: Copy this migration php script into a php file in the project root and execute it.
@@ -106,8 +106,8 @@ KILL connection_id();
 
 DELIMITER $$
 
-DROP PROCEDURE IF EXISTS upgrade_database__moderation $$
-CREATE PROCEDURE upgrade_database__moderation()
+DROP PROCEDURE IF EXISTS upgrade_database $$
+CREATE PROCEDURE upgrade_database()
 BEGIN
 
 
@@ -144,6 +144,6 @@ END IF;
 
 END $$
 
-CALL upgrade_database__moderation() $$
+CALL upgrade_database() $$
 
 DELIMITER ;
