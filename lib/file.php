@@ -42,10 +42,10 @@ function tryDeleteFiles($files)
 			deleteFromCdn($file['cdnPath']);
 			if($file['hasThumbnail']) deleteFromCdn("{$noext}_55_60.{$ext}"); // thumbnail
 		
-			logAuditEvent(AUDIT_LOG_KIND_FILE_DELETE, $assetId);
+			logAuditEvent(AUDIT_LOG_KIND_FILE_DELETE, $file['fileId']);
 		}
 		else {
-			logAuditEvent(AUDIT_LOG_KIND_FILE_DELETE, $assetId, "$countOfFilesUsingThisCDNPath");
+			logAuditEvent(AUDIT_LOG_KIND_FILE_DELETE, $file['fileId'], "$countOfFilesUsingThisCDNPath");
 		}
 	}
 

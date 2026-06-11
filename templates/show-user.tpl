@@ -33,7 +33,7 @@
 		<h1>User activity history (latest 100)</h1>
 		<div class="audit-log-wrap" style="max-height: calc(100vh - 15em)">
 			<table class="stdtable">
-				<thead><th>Date</th><th>Target</th><th>Kind</th><th>Info</th></thead>
+				<thead><tr><th>Date</th><th>Target</th><th>Kind</th><th>Info</th></tr></thead>
 				<tbody>
 					<? foreach($auditLogs as $logEntry) require($this->templatedir.'audit-log-entry-for-user.tpl'); ?>
 				</tbody>
