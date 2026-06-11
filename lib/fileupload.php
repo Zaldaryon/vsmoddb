@@ -143,7 +143,7 @@ function processFileUpload($file, $assetTypeId, $parentAssetId, $parentModId) {
 		}
 	}
 	else {
-		logAuditEvent(AUDIT_LOG_KIND_FILE_CREATE, $fileId);
+		logAuditEvent(AUDIT_LOG_KIND_FILE_CREATE, $fileId, "{$file['name']}");
 	}
 
 	$data = array(
