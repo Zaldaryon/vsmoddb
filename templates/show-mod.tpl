@@ -1,6 +1,6 @@
 {capture name="head"}
 <meta content="{$asset['name']}" property="og:title" />
-<meta content="{htmlspecialchars(strip_tags($assetraw['text']))}" property="og:description" />
+<meta content="{escapeHtml(strip_tags($assetraw['text']))}" property="og:description" />
 <meta name="twitter:card" content="summary_large_image">
 {if (empty($asset['logoUrl']))}
 <meta content="/web/img/mod-default.png" property="og:image" />
@@ -158,7 +158,7 @@
 						{else}<strong>Recommended download:</strong><br>
 						{/if}
 
-						<a class="button square ico-button mod-dl" href="{formatDownloadTrackingUrl($recommendedReleaseStable['file'])}">{htmlspecialchars($recommendedReleaseStable['file']['name'])}</a>
+						<a class="button square ico-button mod-dl" href="{formatDownloadTrackingUrl($recommendedReleaseStable['file'])}">{escapeHtml($recommendedReleaseStable['file']['name'])}</a>
 						{if !empty($recommendedReleaseStable['identifier']) && $shouldShowOneClickInstall}&nbsp;{include file="button-one-click-install" release=$recommendedReleaseStable}{/if}
 						{if $recommendedReleaseUnstable}<br>{/if}
 					{elseif $fallbackRelease}
@@ -168,7 +168,7 @@
 						{else}<strong>Latest release:</strong><br>
 						{/if}
 
-						<a class="button square ico-button mod-dl" href="{formatDownloadTrackingUrl($fallbackRelease['file'])}">{htmlspecialchars($fallbackRelease['file']['name'])}</a>
+						<a class="button square ico-button mod-dl" href="{formatDownloadTrackingUrl($fallbackRelease['file'])}">{escapeHtml($fallbackRelease['file']['name'])}</a>
 						{if !empty($fallbackRelease['identifier']) && $shouldShowOneClickInstall}&nbsp;{include file="button-one-click-install" release=$fallbackRelease}{/if}
 						{if $recommendedReleaseUnstable}<br>{/if}
 					{/if}
@@ -177,7 +177,7 @@
 						{else}<strong>For testers:</strong><br>
 						{/if}
 
-						<a class="button square ico-button mod-dl" href="{formatDownloadTrackingUrl($recommendedReleaseUnstable['file'])}">{htmlspecialchars($recommendedReleaseUnstable['file']['name'])}</a>
+						<a class="button square ico-button mod-dl" href="{formatDownloadTrackingUrl($recommendedReleaseUnstable['file'])}">{escapeHtml($recommendedReleaseUnstable['file']['name'])}</a>
 						{if !empty($recommendedReleaseUnstable['identifier']) && $shouldShowOneClickInstall}&nbsp;{include file="button-one-click-install" release=$recommendedReleaseUnstable}{/if}
 					{/if}
 				</dd>
@@ -233,7 +233,7 @@
 							<td>{fancyDate($release['created'])}</td>
 							<td>{if $release['text'] || $release['retractionReason']}<label for="cl-trigger-{$release['assetId']}" class="button square cl-trigger">Show</label>{else}Empty{/if}</td>
 							{if !$release['retractionReason']}
-								<td>{if !empty($release['file'])}<a class="button square ico-button mod-dl" href="{formatDownloadTrackingUrl($release['file'])}">{htmlspecialchars($release['file']['name'])}</a>{/if}</td>
+								<td>{if !empty($release['file'])}<a class="button square ico-button mod-dl" href="{formatDownloadTrackingUrl($release['file'])}">{escapeHtml($release['file']['name'])}</a>{/if}</td>
 							{if $shouldShowOneClickInstall}<td>{if !empty($release['identifier'])}{include file="button-one-click-install"}{/if}</td>{/if}
 							{else}
 								<td {if $shouldShowOneClickInstall} colspan="2"{/if}>Release Retracted</td>

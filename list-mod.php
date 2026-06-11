@@ -5,7 +5,7 @@ include($config["basepath"] . "lib/search-mods.php");
 if(isset($_GET['paging'])) {
 	if($paramError = validateModSearchInputs($searchParams, true)) {
 		http_response_code(HTTP_BAD_REQUEST);
-		exit(htmlspecialchars($paramError));
+		exit(escapeHtml($paramError));
 	}
 	if(!$searchParams['limit']) $searchParams['limit'] = MOD_SEARCH_PAGE_SIZE;
 
@@ -32,7 +32,7 @@ $selectedParams = [
 	'side'    => $filters['side'] ?? '',
 	'type'    => $filters['type'] ?? '',
 	'category'=> $filters['category'] ?? '',
-	'text'    => htmlSpecialChars($filters['text'] ?? ''),
+	'text'    => escapeHtml($filters['text'] ?? ''),
 	'contributor' => !empty($filters['contributor'])
 		? [$filters['contributor'], $con->getOne('SELECT `name` FROM users WHERE `hash` = UNHEX(?)', [$filters['contributor']])]
 		: [],

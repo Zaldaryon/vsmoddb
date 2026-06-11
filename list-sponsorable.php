@@ -19,7 +19,7 @@ foreach($rawData as $row) {
 
 	$matchesHTML = '';
 	if($row['donateUrl']) {
-		$matchesHTML = '<span>Donate URL: <mark>'.htmlspecialchars($row['donateUrl']).'</mark></span>';
+		$matchesHTML = '<span>Donate URL: <mark>'.escapeHtml($row['donateUrl']).'</mark></span>';
 	}
 
 	$rawText = $row['text'] ?? '';
@@ -28,8 +28,8 @@ foreach($rawData as $row) {
 		list($matchText, $matchOffset) = $match;
 
 		$startIndex = max(0, $matchOffset - EXTEND_MATCHES_BY);
-		$before = htmlspecialchars(substr($rawText, $startIndex, $matchOffset - $startIndex));
-		$after = htmlspecialchars(substr($rawText, $matchOffset + strlen($matchText), EXTEND_MATCHES_BY));
+		$before = escapeHtml(substr($rawText, $startIndex, $matchOffset - $startIndex));
+		$after = escapeHtml(substr($rawText, $matchOffset + strlen($matchText), EXTEND_MATCHES_BY));
 
 		// @security: The $matchText cannot contain html because the match pattern is plain text and does not capture unknown characters.
 		$matchesHTML .= "<span>In Description: {$before}<mark>{$matchText}</mark>{$after}</span>";
@@ -44,13 +44,13 @@ foreach($rawData as $row) {
 
 	if(array_key_exists($ownerId, $dataByUser)) {
 		$dataByUser[$ownerId]['mods'][] = $modData;
-		if($row['donateUrl']) $dataByUser[$ownerId]['confirmedUrls'][htmlspecialchars($row['donateUrl'])] = 1;
+		if($row['donateUrl']) $dataByUser[$ownerId]['confirmedUrls'][escapeHtml($row['donateUrl'])] = 1;
 	}
 	else {
 		$dataByUser[$ownerId] = [
 			'userHash'      => $row['hash'],
 			'username'      => $row['username'],
-			'confirmedUrls' => $row['donateUrl'] ? [htmlspecialchars($row['donateUrl']) => 1] : [],
+			'confirmedUrls' => $row['donateUrl'] ? [escapeHtml($row['donateUrl']) => 1] : [],
 			'mods'          => [$modData],
 		];
 	}

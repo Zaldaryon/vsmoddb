@@ -59,7 +59,7 @@ class View {
 			}
 		}
 		if (is_string($value)) {
-			$value = htmlspecialchars($value);
+			$value = escapeHtml($value);
 		}
 		return $value;
 	}

@@ -173,7 +173,7 @@ else if(!empty($_POST['save'])) {
 						addMessage(MSG_CLASS_ERROR, "This version ($rv) of the mod has already been released (<a href='/edit/release/?assetid={$inUseBy['assetId']}'>link</a>).");
 					}
 					else {
-						$mid = htmlspecialchars($newData['identifier']);
+						$mid = escapeHtml($newData['identifier']);
 						$mpath = formatModPath(['urlAlias' => $inUseBy['urlAlias'], 'assetId' => $inUseBy['modAssetId']]);
 						addMessage(MSG_CLASS_ERROR, "This modid ('$mid') is already in use by another mod (<a href='$mpath' target='_blank'>link</a>).");
 					}

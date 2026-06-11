@@ -19,7 +19,7 @@
 					<td>{stringifyModactionKind($rec['kind'])}</td>
 				{/if}
 				<td>{formatDateWhichMightBeForever($rec['until'])}</td>
-				<td>{$rec['reason']}</td><td>{htmlspecialchars($rec['moderatorName'])}</td>
+				<td>{$rec['reason']}</td><td>{escapeHtml($rec['moderatorName'])}</td>
 			</tr>
 		{/foreach}
 	</tbody>

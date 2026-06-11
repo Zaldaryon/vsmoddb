@@ -1,7 +1,7 @@
 
 {include file="header"}
 
-<h2><span>About {htmlspecialchars($shownUser['name'])}</span>{if $shownUser['isBanned']}&nbsp;<span style="color: red;">[currently restricted]</span>{/if}</h2>
+<h2><span>About {escapeHtml($shownUser['name'])}</span>{if $shownUser['isBanned']}&nbsp;<span style="color: red;">[currently restricted]</span>{/if}</h2>
 
 <div style="float: right;">
 	{if canModerate($shownUser, $user)}

@@ -957,7 +957,7 @@ function _inflateLink($link, $wrapUnmatchedLink)
 	if(!$wrapUnmatchedLink) return false;
 
 	$safeLink = str_replace("'", "%27", $link); // @security: We escape the single quote to prevent the link form being able to escape the href in the anchor tag, but we cannot use htmlspecialchars since we need an actual link.
-	$content = htmlspecialchars($link);
+	$content = escapeHtml($link);
 	return "<a target='_blank'{$relAttr} href='$safeLink'>$content</a>";
 }
 
