@@ -80,7 +80,7 @@ switch($urlparts[1]) {
 					");
 				}
 
-				logAuditEvent(AUDIT_LOG_KIND_COMMENT_CREATE, $modId);
+				logAuditEvent(AUDIT_LOG_KIND_COMMENT_CREATE, $commentId);
 
 				$ok = $con->completeTrans();
 				if(!$ok)  fail(HTTP_INTERNAL_ERROR, ['reason' => 'Database error.']);

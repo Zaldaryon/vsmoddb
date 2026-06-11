@@ -81,8 +81,8 @@ function updateMod($oldModData, $mod, $filesInOrder, $newMembers, $newEditorMemb
 	$logFlagsGeneral = canModerate(null, $user) ? AUDIT_LOG_FLAG_MODACTION : 0; // @correctness: filter out team members.
 	$logValues = [];
 	if($diff = createAuditLogDiff($oldModData['urlAlias'], $mod['urlAlias'])) array_push($logValues, AUDIT_LOG_KIND_MOD_CHANGE_URL_ALIAS, $diff, $logFlagsGeneral);
-	if($oldModData['cardLogoFileId'] != $mod['cardLogoFileId']) array_push($logValues, AUDIT_LOG_KIND_MOD_CHANGE_THUMBNAIL, $logFlagsGeneral);
-	if($oldModData['embedLogoFileId'] != $mod['embedLogoFileId']) array_push($logValues, AUDIT_LOG_KIND_MOD_CHANGE_THUMBNAIL_WEB, $logFlagsGeneral);
+	if($oldModData['cardLogoFileId'] != $mod['cardLogoFileId']) array_push($logValues, AUDIT_LOG_KIND_MOD_CHANGE_THUMBNAIL, null, $logFlagsGeneral);
+	if($oldModData['embedLogoFileId'] != $mod['embedLogoFileId']) array_push($logValues, AUDIT_LOG_KIND_MOD_CHANGE_THUMBNAIL_WEB, null, $logFlagsGeneral);
 	if($diff = createAuditLogDiff($oldModData['homepageUrl'], $mod['homepageUrl'])) array_push($logValues, AUDIT_LOG_KIND_MOD_CHANGE_LINK, $diff, AUDIT_LOG_FLAG_LINK_CHANGE_HOMEPAGE | $logFlagsGeneral);
 	if($diff = createAuditLogDiff($oldModData['sourceCodeUrl'], $mod['sourceCodeUrl'])) array_push($logValues, AUDIT_LOG_KIND_MOD_CHANGE_LINK, $diff, AUDIT_LOG_FLAG_LINK_CHANGE_SOURCE | $logFlagsGeneral);
 	if($diff = createAuditLogDiff($oldModData['trailerVideoUrl'], $mod['trailerVideoUrl'])) array_push($logValues, AUDIT_LOG_KIND_MOD_CHANGE_LINK, $diff, AUDIT_LOG_FLAG_LINK_CHANGE_TRAILER | $logFlagsGeneral);

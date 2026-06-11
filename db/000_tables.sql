@@ -163,20 +163,6 @@ CREATE TABLE IF NOT EXISTS `comments` (
 )
 ENGINE = InnoDB;
 
-CREATE TABLE IF NOT EXISTS `changelogs` (
-  `changelogId`  INT       NOT NULL AUTO_INCREMENT,
-  `assetId`      INT           NULL, -- null for file deletions as of now
-  `userId`       INT       NOT NULL,
-  `text`         TEXT CHARACTER SET utf8mb4 NOT NULL,
-  `created`      DATETIME  NOT NULL DEFAULT NOW(),
-  `lastModified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`changelogId`),
-  INDEX `assetId` (`assetId`),
-  INDEX `userId` (`userId`),
-  CONSTRAINT `FK_changelogs_userId` FOREIGN KEY (`userId`) REFERENCES `users`(`userId`) ON UPDATE CASCADE ON DELETE CASCADE
-)
-ENGINE = InnoDB;
-
 CREATE TABLE IF NOT EXISTS `auditLogs` (
 	`logId`            INT  UNSIGNED NOT NULL AUTO_INCREMENT,
 	`kind`             INT1 UNSIGNED NOT NULL,

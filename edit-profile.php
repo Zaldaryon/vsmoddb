@@ -26,7 +26,7 @@ if (!empty($_POST['save'])) {
 	$con->execute('UPDATE users SET bio = ? WHERE userId = ?', [$new, $shownUser['userId']]);
 
 	$logFlags = $shownUser['userId'] == $user['userId'] ? 0 : AUDIT_LOG_FLAG_MODACTION;
-	logAuditEvent(AUDIT_LOG_KIND_USER_CHANGE_BIO, $diff, $logFlags);
+	logAuditEvent(AUDIT_LOG_KIND_USER_CHANGE_BIO, $shownUser['userId'], $diff, $logFlags);
 
 	$ok = $con->completeTrans();
 	if ($ok) {

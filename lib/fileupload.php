@@ -55,8 +55,9 @@ function processFileUpload($file, $assetTypeId, $parentAssetId, $parentModId) {
 
 	if ($parentAssetId) { // Editing existing releases or adding mod images
 		if($assetTypeId === ASSETTYPE_RELEASE) {
-			if($reason = $con->getOne('SELECT rr.reason FROM modReleases r LEFT JOIN modReleaseRetractions rr ON rr.releaseId = r.releaseId WHERE r.assetId = ?', [$parentAssetId])) {
-				return array("status" => "error", "errormessage" => 'Release has been retracted: '.textContent($reason)); 
+			$release = $con->getRow('SELECT r.releaseId, rr.reason FROM modReleases r LEFT JOIN modReleaseRetractions rr ON rr.releaseId = r.releaseId WHERE r.assetId = ?', [$parentAssetId]);
+			if($release && $release['reason']) {
+				return array("status" => "error", "errormessage" => 'Release has been retracted: '.textContent($release['reason'])); 
 			}
 		}
 		$asset = $con->getRow("select assetTypeId, assetId, createdByUserId from assets where assetId = ?", array($parentAssetId));
@@ -132,8 +133,19 @@ function processFileUpload($file, $assetTypeId, $parentAssetId, $parentModId) {
 		$con->execute("INSERT INTO fileImageData (fileId, hasThumbnail, size) VALUES (?, 1, POINT(?, ?))", [$fileId, $width, $height]);
 	}
 
-	if($parentAssetId) logAuditEvent(AUDIT_LOG_KIND_FILE_CREATE, $parentAssetId);
-		
+	$logFlagsGeneral = canModerate(null, $user) ? AUDIT_LOG_FLAG_MODACTION : 0; // @correctness: filter out team members.
+	if($parentAssetId) {
+		if($assetTypeId === ASSETTYPE_RELEASE) {
+			logAuditEvent(AUDIT_LOG_KIND_RELEASE_CHANGE_FILE, $release['releaseId'], "$fileId", $logFlagsGeneral);
+		}
+		else {
+			logAuditEvent(AUDIT_LOG_KIND_MOD_CHANGE_IMAGES, $parentModId, "$fileId", $logFlagsGeneral);
+		}
+	}
+	else {
+		logAuditEvent(AUDIT_LOG_KIND_FILE_CREATE, $fileId);
+	}
+
 	$data = array(
 		"status" => "ok",
 		"fileid" => $fileId,

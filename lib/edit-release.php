@@ -38,7 +38,7 @@ function createNewRelease($mod, $newData, $newCompatibleGameVersions, $file)
 		$logInfo .= " for {$newData['identifier']} with compatible game versions ".formatGrammaticallyCorrectEnumeration(array_map('formatSemanticVersion', $newCompatibleGameVersions));
 	}
 
-	logAuditEvent(AUDIT_LOG_KIND_RELEASE_CREATE, $mod['modId'], $logInfo);
+	logAuditEvent(AUDIT_LOG_KIND_RELEASE_CREATE, $releaseId, $logInfo);
 
 	updateGameVersionsCached($mod['modId']);
 	$con->execute('UPDATE mods set lastReleased = NOW() WHERE modId = ?', [$mod['modId']]);

@@ -1,0 +1,30 @@
+.audit-log-wrap {
+	overflow-x: auto;
+
+	thead {
+		position: sticky;
+		top: 0;
+		z-index: 1;
+
+		background-color: var(--color-content-bg);
+	}
+
+	td:nth-child(1) { // date
+		min-width: 14ch;
+	}
+
+	td:nth-child(2) { // target
+		min-width: 14ch;
+	}
+
+	td:nth-child(4) { // info
+		white-space: pre;
+	}
+
+	.added {
+		background-color: var(--color-diff-added);
+	}
+	.removed {
+		background-color: var(--color-diff-removed);
+	}
+}

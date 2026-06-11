@@ -380,6 +380,7 @@ function verifyPasswordHash($password, $hash)
 const SQL_MOD_CARD_TRANSITION_DATE = "2025-03-10 15:50:00";
 
 const AUDIT_LOG_KIND_LEGACY                     =  0;
+//
 const AUDIT_LOG_KIND_MOD_CREATE                 =  1;
 const AUDIT_LOG_KIND_MOD_DELETE                 =  2;
 const AUDIT_LOG_KIND_MOD_CHANGE_NAME            =  3;
@@ -431,7 +432,7 @@ const AUDIT_LOG_FLAG_MODACTION             = 1 << 0; // moderator initiated acti
 const AUDIT_LOG_FLAG_ACCEPTED              = 0b00 << 1;
 const AUDIT_LOG_FLAG_REJECTED              = 0b01 << 1;
 const AUDIT_LOG_FLAG_ABORTED               = 0b10 << 1;
-const AUDIT_LOG_FLAGS_RESOLUTION_MASK      = 0b11 << 1;
+const AUDIT_LOG_FLAGS_MASK_RESOLUTION      = 0b11 << 1;
 // invites:
 const AUDIT_LOG_FLAG_WITH_EDIT_PERMISSIONS = 1 << 7;
 // mod link change:
@@ -468,6 +469,27 @@ function createAuditLogDiff($old, $new)
 	$diff = xdiff_string_diff($old, $new, 1, true);
 	$diff = str_replace("\\ No newline at end of file\n", '', $diff);
 	return $diff;
+}
+
+/**
+ * @param string $raw
+ * @param bool $escapeContent
+ * @return string formatted html
+ */
+function formatAuditLogDiff($raw, $escapeContent = true)
+{
+	$lines = explode("\n", $raw);
+	array_shift($lines);
+
+	foreach($lines as &$line) {
+		$content = $escapeContent ? escapeHtml(substr($line, 1)) : substr($line, 1);
+		if(str_starts_with($line, '+')) $line = "<span class='added'>{$content}</span>";
+		else if(str_starts_with($line, '-')) $line = "<span class='removed'>{$content}</span>";
+		else $line = $content;
+	}
+	unset($line);
+
+	return implode("\n", $lines);
 }
 
 
@@ -704,6 +726,14 @@ function preprocessStringForFulltextQuery($input)
 	return implode(' ', $parts);
 }
 
+/** egres encoding
+ * @param string $rawHtml
+ * @return string html-safe encoded version
+ */
+function escapeHtml($rawHtml)
+{
+	return htmlspecialchars($rawHtml, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
 
 /** Inflates links and creates spoiler elements.
  * @param string $html
