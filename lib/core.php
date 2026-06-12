@@ -678,10 +678,14 @@ function preprocessStringForFulltextQuery($input)
 	$input = trim($input);
 	if(!$input) return '';
 
+	// https://dev.mysql.com/doc/refman/8.4/en/fulltext-stopwords.html
+	// These should not be marked as required in a query. As a matter of fact, well remove them from queries as they are ignored by fulltext search.
+	static $INNODB_STOPWORDS = ["a", "about", "an", "are", "as", "at", "be", "by", "com", "de", "en", "for", "from", "how", "i", "in", "is", "it", "la", "of", "on", "or", "that", "the", "this", "to", "was", "what", "when", "where", "who", "will", "with", "und", "the", "www"];
+
 	// Split into words and quoted sections:
 	$parts = preg_split('/("[^"]*")|\s+/', $input, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
 	// Manually filter out "", as that  will not be filtered out by PREG_SPLIT_NO_EMPTY because it is not "empty":
-	$parts = array_filter($parts, fn($p) => $p !== '""');
+	$parts = array_filter($parts, fn($p) => $p !== '""' && !in_array($p, $INNODB_STOPWORDS, true));
 
 	foreach($parts as &$part) {
 		if($part[0] === '"') continue; // don't touch quoted sections
@@ -767,8 +771,9 @@ function postprocessCommentHtml($html) //TODO(Rennorb) @cleanup: move this to in
 function trimHtml($html)
 {
 	$html = trim($html);
-
 	if(!$html) return '';
+
+	$html = str_replace("\r\n", "\n", $html); // normalize line endings
 
 	$doc = \Dom\HTMLDocument::createFromString('<body>'.$html.'</body>', LIBXML_HTML_NOIMPLIED | LIBXML_NOERROR, 'UTF-8'); // :WrapUnwrapForDomParser
 	$body = $doc->getElementsByTagName('body')->item(0);

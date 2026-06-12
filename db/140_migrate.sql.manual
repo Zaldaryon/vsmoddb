@@ -1,0 +1,2 @@
+update auditLogs set info = replace(info, "\r\n", "\n");
+update assets set text = replace(text, "\r\n", "\n");
