@@ -112,3 +112,38 @@ function stringifyModerationRequestKind($request)
 	return "{$request['kind']} - {$request['category']}"; // fallback
 }
 
+/**
+ * @param array{kind: int, category: int} $request
+ * @return string
+ */
+function stringifyModerationRequestCategory($request)
+{
+	switch($request['kind']) {
+		case MOD_REQUEST_KIND_REPORT_MOD:
+			switch($request['category']) {
+				case REPORT_CATEGORY_MOD_MALICIOUS:      return 'Malicious';
+				case REPORT_CATEGORY_MOD_DISCRIMINATION: return 'Def./Bul./Obs./Dis./Pro.';
+				case REPORT_CATEGORY_MOD_COPYRIGHT:      return 'Copyright';
+				case REPORT_CATEGORY_MOD_LICENSING:      return 'Licensing';
+				case REPORT_CATEGORY_MOD_ENGLISH:        return 'English';
+				case REPORT_CATEGORY_MOD_EXPLANATION:    return 'Explanation';
+				case REPORT_CATEGORY_MOD_SPAM:           return 'Spam';
+				case REPORT_CATEGORY_MOD_PIRACY:         return 'Piracy';
+				case REPORT_CATEGORY_MOD_LOW_EFFORT_AI:  return '(AI) Low Effort';
+				case REPORT_CATEGORY_OTHER:              return 'Other';
+			}
+			break;
+
+		case MOD_REQUEST_KIND_REPORT_COMMENT:
+			switch($request['category']) {
+				case REPORT_CATEGORY_COMMENT_DISCRIMINATION: return 'Def./Bul./Obs./Dis./Pro.';
+				case REPORT_CATEGORY_COMMENT_SPAM:           return 'Spam';
+				case REPORT_CATEGORY_COMMENT_PIRACY:         return 'Piracy';
+				case REPORT_CATEGORY_OTHER:                  return 'Other';
+			}
+			break;
+	}
+	return "{$request['kind']} - {$request['category']}"; // fallback
+}
+
+

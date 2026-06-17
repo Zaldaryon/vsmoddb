@@ -33,6 +33,7 @@ switch($urlparts[1] ?? null) {
 
 		$requestSearchable = textContent($requestHtml);
 		if(!$requestSearchable) fail(HTTP_BAD_REQUEST, ['error' => 'Reason must not be empty.']);
+		if(strlen($requestSearchable) < 100) fail(HTTP_BAD_REQUEST, ['error' => 'Reason not substantial.']);
 
 
 

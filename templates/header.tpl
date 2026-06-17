@@ -78,7 +78,7 @@
 				</span>
 				
 				{if ($user['roleCode'] == 'admin')}
-					<span class="icon-only submenu{if $headerHighlight === HEADER_HIGHLIGHT_ADMIN_TOOLS} active{/if}">
+					<span class="icon-only submenu{if $headerHighlight === HEADER_HIGHLIGHT_ADMIN_TOOLS} active{/if} site-settings">
 						<span><i class="bx bxs-cog"></i></span>
 						<nav>
 							<a href="/list/user">Users</a>
@@ -93,7 +93,8 @@
 					<nav>
 						<a href="/show/user/{$user['hash']}">Profile</a>
 						<a href="/accountsettings" class="strikethrough-when-readonly">Settings</a>
-						<a href="/t/u/self">Requests</a>
+						<a href="/t/u/self">My Requests</a>
+						{if !empty($user) && canModerate(null, $user)}<a href="/t/">All Requests</a>{/if}
 						<a href="/logout?at={$user['actionToken']}" class="strikethrough-when-readonly">Logout</a>
 					</nav>
 				</span>
