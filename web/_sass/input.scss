@@ -35,13 +35,14 @@ input, select, textarea,
 	border: 1px solid var(--color-border);
 }
 
-input, button,
+input, button, select.no-chosen, textarea,
 .prefixed-input {
 	padding: 0 .25em;
 }
 
 input:disabled,
 button:disabled,
+select:disabled,
 .button:disabled,
 .prefixed-input.disabled {
 	background-color: var(--color-input-disabled);

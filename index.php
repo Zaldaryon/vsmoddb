@@ -63,17 +63,14 @@ switch($urlparts[0]) { // :ReservedUrlPrefixes
 	case 'download':
 	case 'notifications':
 	case 'updateversiontags':
-		include($urlparts[0].'.php');
-		exit();
+		exit(require($urlparts[0].'.php'));
 	
 	case 'notification':
-		include("lib/notification.php");
-		exit();
+		exit(require("lib/notification.php"));
 
 	case 'webhooks':
 		array_shift($urlparts);
-		include("lib/webhook-handlers.php");
-		exit();
+		exit(require("lib/webhook-handlers.php"));
 
 	case 'list':
 	case 'show':
@@ -84,18 +81,22 @@ switch($urlparts[0]) { // :ReservedUrlPrefixes
 		// edit/profile -> edit-profile.php 
 		$filename = implode("-", array_slice($urlparts, 0, 2)) . ".php";
 		if (file_exists($filename)) {
-			include($filename);
-			exit();
+			exit(require($filename));
 		}
 
 		// If we get here its 404 not found. Ignore the aliases, these prefixes are reserved.
 		break;
 
+	case 't':
+		if(is_numeric($urlparts[1] ?? null))
+			exit(require('ticket.php'));
+		else
+			exit(require('ticket-list.php'));
+
 	default: // @security: Check for url-aliases last. Don't allow mods to overwrite urls.
 		if ($assetId = $con->getOne('select assetId from mods where urlAlias = ?', [$urlparts[0]])) {
 			$urlparts = ['show', 'mod', $assetId]; // Update $urlparts to supply the correct assetId to the handler.
-			include('show-mod.php');
-			exit();
+			exit(require('show-mod.php'));
 		}
 }
 

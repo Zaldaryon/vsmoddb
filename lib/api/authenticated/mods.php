@@ -1,6 +1,6 @@
 <?php
 
-//NOTE(Rennorb): Assume the user object exists.
+/** @var array $user */
 
 if(count($urlparts) < 2)   fail(HTTP_BAD_REQUEST);
 
@@ -142,6 +142,68 @@ switch($urlparts[1]) {
 		$ok = $con->completeTrans();
 		if($ok) good();
 		else fail(HTTP_INTERNAL_ERROR, ['error' => 'Internal database error.']);
+
+	case 'report':
+		validateMethod('PUT');
+		validateUserNotBanned();
+
+		list($_POST, $_) = request_parse_body();
+		if(!empty($_POST['at']) && empty($_REQUEST['at'])) $_REQUEST['at'] = $_POST['at'];
+
+		validateActionTokenAPI();
+
+		require $config['basepath'] . 'lib/moderation.php';
+
+		$category = filter_input(INPUT_POST, 'category', FILTER_VALIDATE_INT, [ 'options' => [ 'min' => 0, 'max' => 9 ]]); // :MaxReportCategoryMod
+		if($category === null)  fail(HTTP_BAD_REQUEST, ['error' => 'Missing category.']);
+		if($category === false)  fail(HTTP_BAD_REQUEST, ['error' => 'Malformed category.']);
+
+		$requestHtml = $_POST['reason'] ?? '';
+		$requestHtml = trimHtml(sanitizeHtml($requestHtml));
+		if(!$requestHtml) fail(HTTP_BAD_REQUEST, ['error' => 'Reason must not be empty.']);
+
+		$requestSearchable = textContent($requestHtml);
+		if(!$requestSearchable) fail(HTTP_BAD_REQUEST, ['error' => 'Reason must not be empty.']);
+
+
+
+		$previousRequest = $con->getRow(
+			"SELECT requestId, resolved
+			 FROM moderationRequests WHERE (referenceId, kind, category, initiatorUserId) = ($modId, ".MOD_REQUEST_KIND_REPORT_MOD.", $category, {$user['userId']}) 
+			   AND (resolved IS NULL OR resolved >= DATE_SUB(NOW(), INTERVAL ".MOD_REPORT_DEDUPLICATION_TIMESPAN.' DAY))'
+		); // @security: $modId, $category and $user['userId'] are all validated to be int, therefore sql inert.
+
+		if($previousRequest) {
+			fail(HTTP_TOO_MANY_REQUESTS, [
+				'reason' => $previousRequest['resolved']
+					? "You have already reported this server for the same reason some time ago, which has been resolved <a href='/t/{$previousRequest['requestId']}' target='_blank'>here</a>."
+					: "You have already reported this server for the same reason some time ago, which can be viewed <a href='/t/{$previousRequest['requestId']}' target='_blank'>here</a>.",
+			]);
+		}
+
+		$requestsInLast7Days = $con->getOne('SELECT COUNT(*) FROM moderationRequests WHERE kind = '.MOD_REQUEST_KIND_REPORT_MOD." AND initiatorUserId = {$user['userId']} AND created >= DATE_SUB(NOW(), INTERVAL 7 DAY)");
+		if($requestsInLast7Days > MOD_REPORT_LIMIT_PER_WEEK) {
+			fail(HTTP_TOO_MANY_REQUESTS, [
+				'reason' => "You have reached your alloted quota for reporting mods this week. Your reports can be found <a href='/t/u/self' target='_blank'>here</a>.",
+			]);
+		}
+
+		$con->startTrans();
+
+		$con->execute(
+			"INSERT INTO moderationRequests (referenceId, kind, category, initiatorUserId, request, requestSearchable)
+			 VALUES ($modId, ".MOD_REQUEST_KIND_REPORT_MOD.", $category, {$user['userId']}, ?, ?)",
+			[$requestHtml, $requestSearchable]
+		);
+		$requestId = intval($con->insert_ID());
+
+		logAuditEvent(AUDIT_LOG_KIND_REPORT_CREATE, $requestId);
+
+		$ok = $con->completeTrans();
+		if(!$ok) fail(HTTP_INTERNAL_ERROR, ['error' => 'Internal database error.']);
+
+		header('Location: /t/'.$requestId, true, HTTP_CREATED);
+		exit();
 
 	case 'releases':
 		switch($urlparts[2]) {

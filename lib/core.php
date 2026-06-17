@@ -425,6 +425,11 @@ const AUDIT_LOG_KIND_USER_REDEEM         = 57;
 //...
 const AUDIT_LOG_KIND_FILE_CREATE        = 65;
 const AUDIT_LOG_KIND_FILE_DELETE        = 66;
+//...
+const AUDIT_LOG_KIND_REPORT_CREATE        = 70;
+const AUDIT_LOG_KIND_REPORT_RESOLVE       = 71;
+//...
+// AUDIT_LOG_KIND_MAX = 256
 
 // general:
 const AUDIT_LOG_FLAG_MODACTION             = 1 << 0; // moderator initiated actions hide the specific moderator for normal users.
@@ -443,7 +448,10 @@ const AUDIT_LOG_FLAG_LINK_CHANGE_ISSUES   = 0b011 << 5;
 const AUDIT_LOG_FLAG_LINK_CHANGE_WIKI     = 0b100 << 5;
 const AUDIT_LOG_FLAG_LINK_CHANGE_DONATE   = 0b101 << 5;
 const AUDIT_LOG_FLAGS_MASK_LINK_CHANGES   = 0b111 << 5;
-
+// moderation requests:
+const AUDIT_LOG_FLAG_SOLVED              = 0b00 << 1;
+const AUDIT_LOG_FLAG_WONT_FIX            = 0b01 << 1;
+const AUDIT_LOG_FLAG_SPAM                = 0b10 << 1;
 
 /**
  * @param int $kind AUDIT_LOG kind
@@ -1030,18 +1038,19 @@ function maybeFormatDownloadTrackingUrlDependingOnFileExt($file)
 	}
 }
 
-const HTTP_CREATED             = 201;
-const HTTP_FOUND               = 302;
-const HTTP_BAD_REQUEST         = 400;
-const HTTP_UNAUTHORIZED        = 401;
-const HTTP_FORBIDDEN           = 403;
-const HTTP_NOT_FOUND           = 404;
-const HTTP_WRONG_METHOD        = 405;
-const HTTP_CONFLICT            = 409;
-const HTTP_GONE                = 410;
-const HTTP_INTERNAL_ERROR      = 500;
-const HTTP_NOT_IMPLEMENTED     = 501;
-const HTTP_SERVICE_UNAVAILABLE = 503;
+const HTTP_CREATED               = 201;
+const HTTP_FOUND                 = 302;
+const HTTP_BAD_REQUEST           = 400;
+const HTTP_UNAUTHORIZED          = 401;
+const HTTP_FORBIDDEN             = 403;
+const HTTP_NOT_FOUND             = 404;
+const HTTP_WRONG_METHOD          = 405;
+const HTTP_CONFLICT              = 409;
+const HTTP_GONE                  = 410;
+const HTTP_TOO_MANY_REQUESTS     = 429;
+const HTTP_INTERNAL_ERROR        = 500;
+const HTTP_NOT_IMPLEMENTED       = 501;
+const HTTP_SERVICE_UNAVAILABLE   = 503;
 
 /** Shows an error page based on the http error code and reason message. 
  * This function terminates execution.

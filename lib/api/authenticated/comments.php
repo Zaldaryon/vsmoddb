@@ -1,6 +1,6 @@
 <?php
 
-//NOTE(Rennorb): Assume the user object exists.
+/** @var array $user */
 
 if(empty($urlparts)) {
 	fail(HTTP_BAD_REQUEST);

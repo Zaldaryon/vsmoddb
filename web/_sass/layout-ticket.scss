@@ -1,0 +1,30 @@
+.moderation-request {
+	.by-user {
+		font-size: small;
+		color: var(--color-text-weak);
+	}
+
+	>div>h3 {
+		margin-bottom: 1em;
+	}
+
+	.buttons {
+		display: block;
+
+		textarea {
+			width: 100%; // needs to also be inline for tiny ... 
+			min-height: 15.5em;
+		}
+
+		>div {
+			display: flex;
+			flex-direction: row;
+			gap: .5em;
+			margin-top: .5em;
+
+			>button {
+				height: unset;
+			}
+		}
+	}
+}

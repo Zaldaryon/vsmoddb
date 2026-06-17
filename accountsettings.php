@@ -23,7 +23,7 @@ $followedMods = $con->getAll('
 ', [$user['userId']]);
 
 
-cspReplaceAllowedFetchSources("{$_SERVER['HTTP_HOST']}/api/v2/notifications/settings/followed-mods/");
+cspReplaceAllowedFetchSources("{$_SERVER['HTTP_HOST']}/api/v2/settings/notifications/followed-mods/ {$_SERVER['HTTP_HOST']}/api/v2/settings/gen-ai");
 
 $view->assign('headerHighlight', HEADER_HIGHLIGHT_CURRENT_USER, null, true);
 $view->assign('followedMods', $followedMods);

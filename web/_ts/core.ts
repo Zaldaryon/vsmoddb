@@ -37,8 +37,7 @@ onDOMLoaded : function(callback : () => void) {
 	else document.addEventListener('DOMContentLoaded', callback);
 },
 msgContainer : null as unknown as HTMLElement,
-addMessage : function(clazz : string, html : string, escapeMessage? : boolean) {
-	escapeMessage = escapeMessage || true;
+addMessage : function(clazz : string, html : string, escapeMessage : boolean = true) {
 	const msgEl = R.make('div.'+clazz);
 	if(escapeMessage) {
 		msgEl.textContent = html;
@@ -53,7 +52,7 @@ markAsErrorElement : function(el : HTMLElement) {
 	el.classList.add('invalid');
 	setTimeout(() => el.classList.remove('invalid'), 500);
 },
-attachDefaultFailHandler : function(jqXHR : jqXHR, errorPrefix : string = 'Request failed') : jqXHR {
+attachDefaultFailHandler : function(jqXHR : jqXHR, errorPrefix : string = 'Request failed', errorHandler? : (e : string) => boolean) : jqXHR {
 	return jqXHR.fail(jqXHR => {
 		let d;
 		try{ d = JSON.parse(jqXHR.responseText); }
@@ -61,7 +60,9 @@ attachDefaultFailHandler : function(jqXHR : jqXHR, errorPrefix : string = 'Reque
 			R.addMessage(MSG_CLASS_ERROR, 'Failed to parse response.', false);
 			d = { reason: jqXHR.responseText };
 		}
-		R.addMessage(MSG_CLASS_ERROR, errorPrefix + (d.reason ? (': '+d.reason) : '.'), true)
+		const message = errorPrefix + (d.reason ? (': '+d.reason) : '.');
+		if(!errorHandler || !errorHandler(message))
+			R.addMessage(MSG_CLASS_ERROR, message, true);
 	});
 },
 trimLeadingEmptyLines : function(element : Node) : void {
@@ -117,3 +118,8 @@ const MSG_CLASS_WARN = 'bg-warning';
 const MSG_CLASS_ERROR = 'bg-error.text-error';
 
 
+function temporaryHighlight(el : HTMLElement)
+{
+	el.classList.add('highlight');
+	setTimeout(() => el.classList.remove('highlight'), 2000); // remove so sorting doesn't re-trigger the highlight.
+}

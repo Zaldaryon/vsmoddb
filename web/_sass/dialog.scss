@@ -43,6 +43,10 @@ dialog {
 		}
 	}
 
+	.err-container {
+		color: var(--color-input-r);
+	}
+
 	&::backdrop {
 		background-color: var(--color-backdrop);
 	}

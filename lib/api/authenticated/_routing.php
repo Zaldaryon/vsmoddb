@@ -4,6 +4,8 @@ if(empty($user)) {
 	fail(401);
 }
 
+/** @var array<string> $urlparts */
+
 
 /** Validates that the current user is not banned and `fail`s with a reason if they are. */
 function validateUserNotBanned()
@@ -23,6 +25,11 @@ switch($urlparts[0]) {
 	case 'notifications':
 		array_shift($urlparts);
 		include(__DIR__ . '/notifications.php');
+		break;
+
+	case 'settings':
+		array_shift($urlparts);
+		include(__DIR__ . '/settings.php');
 		break;
 
 	case 'comments':

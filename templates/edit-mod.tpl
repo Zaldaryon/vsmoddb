@@ -26,7 +26,7 @@
 		<input type="hidden" name="delete" value="1">
 	</form>
 
-	<form method="post" name="form1" autocomplete="off" class="flex-list">
+	<form method="post" name="form1" autocomplete="off" class="flex-list are-you-sure">
 		<input type="hidden" name="at" value="{$user['actionToken']}">
 		<input type="hidden" name="save" value="1">
 		<input type="hidden" name="assetid" value="{$mod['assetId']}">

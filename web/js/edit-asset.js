@@ -152,7 +152,7 @@ function submitForm(returntolist) {
 		}
 	});
 
-	$('form[name=form1]').trigger('reinitialize.areYouSure');
+	$('form.are-you-sure').trigger('reinitialize.areYouSure');
 
 	if (!good) {
 		alert("Please fill in all required fields");

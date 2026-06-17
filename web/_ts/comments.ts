@@ -346,12 +346,6 @@ function attachCommentHandlers() {
 		setTimeout(() => temporaryHighlight(target), 100); // wait until scrolled into view
 	}
 
-	function temporaryHighlight(el : HTMLElement)
-	{
-		el.classList.add('highlight');
-		setTimeout(() => el.classList.remove('highlight'), 2000); // remove so sorting doesn't re-trigger the highlight.
-	}
-
 	//
 	// Util stuff
 	//

@@ -243,7 +243,29 @@ case AUDIT_LOG_KIND_FILE_CREATE: ?>
 
 
 case AUDIT_LOG_KIND_FILE_DELETE: ?>
-<td>Deleted File</td>
+<td>Created Report</td>
 <td><?= escapeHtml($logEntry['info']) ?></td>
 	<? break;
+
+
+case AUDIT_LOG_KIND_REPORT_CREATE: ?>
+	<td>Deleted File</td>
+	<td><?= escapeHtml($logEntry['info']) ?></td>
+		<? break;
+
+
+case AUDIT_LOG_KIND_REPORT_RESOLVE: ?>
+	<td><? switch($logEntry['flags'] & AUDIT_LOG_FLAGS_MASK_RESOLUTION) {
+		case AUDIT_LOG_FLAG_ACCEPTED: echo 'Accepted Team Invite'; break;
+		case AUDIT_LOG_FLAG_REJECTED: echo 'Rejected Team Invite'; break;
+		case AUDIT_LOG_FLAG_ABORTED:  echo 'Aborted Team Member Invite'; break;
+	} ?></td>
+	<td><?= escapeHtml($logEntry['info']) ?></td>
+		<? break;
+
+
+default: ?>
+	<td><?= $logEntry['kind'] ?></td>
+	<td><?= escapeHtml($logEntry['info']) ?></td>
+		<? break;
 } ?>

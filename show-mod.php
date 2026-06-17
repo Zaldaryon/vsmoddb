@@ -1,6 +1,7 @@
 <?php
 
 include $config['basepath']. 'lib/recommend-release.php';
+include $config['basepath']. 'lib/moderation.php';
 
 $assetId = $urlparts[2] ?? 0;
 

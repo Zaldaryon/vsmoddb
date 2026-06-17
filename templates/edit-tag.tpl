@@ -13,7 +13,7 @@
 		<input type="hidden" name="delete" value="1">
 	</form>
 
-	<form method="post" name="form1" autocomplete="off" class="flex-list">
+	<form method="post" name="form1" autocomplete="off" class="flex-list are-you-sure">
 		<input type="hidden" name="at" value="{$user['actionToken']}">
 		<input type="hidden" name="save" value="1">
 		<input type="hidden" name="saveandback" value="0">
@@ -49,7 +49,7 @@
 <script nonce="{$cspNonce}" type="text/javascript">
 
 	function submitForm(returntolist) {
-		$('form[name=form1]').trigger('reinitialize.areYouSure');
+		$('form.are-you-sure').trigger('reinitialize.areYouSure');
 		
 		if (returntolist) {
 			$('input[name="saveandback"]').val(1);

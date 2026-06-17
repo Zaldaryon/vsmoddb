@@ -1,0 +1,33 @@
+#followed-mods-settings {
+	background-color: hsl(var(--c-accent) 86%);
+	padding: .25rem;
+	border: 1px solid hsl(var(--c-accent) 58%);
+	border-radius: 2px;
+}
+
+#followed-mods-settings tr>*:nth-child(n+2) {
+	text-align: center;
+	padding-left: 1em;
+}
+
+#gen-ai {
+	.slider-wrapper {
+		position: relative;
+		
+		&::before, &::after {
+			position: absolute;
+			font-size: x-small;
+			top: 50%;
+		}
+
+		&::before {
+			content: '0';
+			left: 0;
+		}
+
+		&::after {
+			content: 'Inf.';
+			right: 0;
+		}
+	}
+}

@@ -43,6 +43,13 @@
 	}
 }</script>
 
+<h3>Content Settings</h3>
+<p><small>Changes apply immediately.</small></p>
+
+<div id="gen-ai">
+	<label>Gen-AI tolerance: <span class="slider-wrapper"><input id="gen-ai-input" type="range" min="1" max="100" value="{$user['genAiTolerance'] === 0 ? 100 : $user['genAiTolerance']}" autocomplete="off"></span><br><span id="gen-ai-label">Mods using Gen-AI will not be hidden.</span></label>
+</div>
+
 <h3>Notification Settings</h3>
 {if count($followedMods)}
 <p><small>Changes apply immediately.</small></p>
@@ -63,42 +70,49 @@
 	<span>You don't follow any mods</span>
 {/if}
 
-<style nonce="{$cspNonce}">
-	#followed-mods-settings {
-		background-color: hsl(var(--c-accent) 86%);
-		padding: .25rem;
-		border: 1px solid hsl(var(--c-accent) 58%);
-		border-radius: 2px;
-	}
+<script nonce="{$cspNonce}" type="text/javascript">
+const fms = document.getElementById('followed-mods-settings');
+if(fms) fms.addEventListener('change', e => \{
+	const trEl = e.target.parentElement.parentElement.parentElement;
+	const targetModId = trEl.dataset.modid;
+	const oldFlags = parseInt(trEl.dataset.flags);
+	const targetBitMask = 1 << parseInt(e.target.dataset.bit);
+	const targetBitState = e.target.checked;
 
-	#followed-mods-settings tr>*:nth-child(n+2) {
-		text-align: center;
-		padding-left: 1em;
-	}
-</style>
+	const newFlags = targetBitState ? (oldFlags | targetBitMask) : (oldFlags & ~targetBitMask);
+	trEl.dataset.flags = newFlags;
+
+	const xhr = $.post('/api/v2/settings/notifications/followed-mods/'+targetModId, \{ 'new': newFlags })
+	R.attachDefaultFailHandler(xhr, 'Failed to change notification setting', () => \{
+		e.target.checked = !targetBitState; // reset setting on error
+		const oldFlags = parseInt(trEl.dataset.flags); // can't reuse outer oldSetting, other bits might have changed in the meantime
+		trEl.dataset.flags = !targetBitState ? (oldFlags | targetBitMask) : (oldFlags & ~targetBitMask);
+		return false;
+	});
+});
+
+
+const genaiInputEl = document.getElementById('gen-ai-input');
+const genaiLabelEl = document.getElementById('gen-ai-label');
+function updateGenAiLabel(value)
+\{
+	genaiLabelEl.textContent = 'Mods using Gen-AI will '+(value == 100 ? 'not be hidden.' : `be hidden after they have been reported as low-effort by at least ${value} user${value == 1 ? '' : 's'}.`);
+}
+updateGenAiLabel(genaiInputEl.value);
+genaiInputEl.addEventListener('input', e => updateGenAiLabel(e.target.value));
+genaiInputEl.addEventListener('change', e => \{
+	const xhr = $.post('/api/v2/settings/gen-ai', \{ 'tolerance': e.target.value == 100 ? -1 : (parseInt(e.target.value) - 1) })
+	R.attachDefaultFailHandler(xhr, 'Failed to change tolerance setting');
+});
+</script>
 
 {capture name="footerjs"}
-	<script nonce="{$cspNonce}" type="text/javascript">
-		const fms = document.getElementById('followed-mods-settings');
-		if(fms) fms.addEventListener('change', e => {
-			const trEl = e.target.parentElement.parentElement.parentElement;
-			const targetModId = trEl.dataset.modid;
-			const oldFlags = parseInt(trEl.dataset.flags);
-			const targetBitMask = 1 << parseInt(e.target.dataset.bit);
-			const targetBitState = e.target.checked;
-
-			const newFlags = targetBitState ? (oldFlags | targetBitMask) : (oldFlags & ~targetBitMask);
-			trEl.dataset.flags = newFlags;
-
-			const xhr = $.post('/api/v2/notifications/settings/followed-mods/'+targetModId, { 'new': newFlags })
-				.fail(jqXHR => {
-					e.target.checked = !targetBitState; // reset setting on error
-					const oldFlags = parseInt(trEl.dataset.flags); // can't reuse outer oldSetting, other bits might have changed in the meantime
-					trEl.dataset.flags = !targetBitState ? (oldFlags | targetBitMask) : (oldFlags & ~targetBitMask);
-				});
-			R.attachDefaultFailHandler(xhr, 'Failed to change settings');
-		});
-	</script>
+<script nonce="{$cspNonce}">
+if(document.location.hash) \{
+	const el = document.getElementById(document.location.hash.substring(1));
+	if(el) temporaryHighlight(el);
+}
+</script>
 {/capture}
 
 {include file="footer"}

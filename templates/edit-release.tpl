@@ -12,7 +12,7 @@
 		<span>{$release['assetId'] ? 'Edit Release' : 'Add new Release'}</span>
 	</h2>
 
-	<form method="post" name="form1" enctype="multipart/form-data" autocomplete="off" class="flex-list">
+	<form method="post" name="form1" enctype="multipart/form-data" autocomplete="off" class="flex-list are-you-sure">
 		<input type="hidden" name="at" value="{$user['actionToken']}">
 		<input type="hidden" name="save" value="1">
 		<input type="hidden" name="assetid" value="{$release['assetId']}">

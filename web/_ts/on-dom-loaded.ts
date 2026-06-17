@@ -1,14 +1,15 @@
 R.onDOMLoaded(function() {
 	// Turn all selects that are not within a template into jquery-chosen selects:
 	$("select").each(function() {
-		if ($(this).parents(".template").length == 0) {
-			var ds = $(this).attr("noSearch") == 'noSearch';
-			$(this).chosen({ placeholder_text_multiple: " ", disable_search:ds, });
+		const $this = $(this);
+		if ($this.parents(".template").length == 0 && !$this.hasClass('no-chosen')) {
+			var ds = $this.attr("noSearch") == 'noSearch';
+			$this.chosen({ placeholder_text_multiple: " ", disable_search:ds, });
 		}
 	});
 	
-	// Attach "are you sure you want to leave this page" on location change prompts to the primary form on the page:
-	$('form[name=form1]').areYouSure();
+	// Attach "are you sure you want to leave this page" on location change prompts:
+	$('form.are-you-sure').areYouSure();
 
 	for(const btn of document.querySelectorAll('[data-opens-dialog]')) {
 		btn.addEventListener('click', e => {

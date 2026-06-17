@@ -1,6 +1,6 @@
 <?php
 
-//NOTE(Rennorb): Assume the user object exists.
+/** @var array $user */
 
 switch(count($urlparts)) {
 	case 0:

@@ -1,0 +1,19 @@
+.ticket-list {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+	grid-template-rows: auto;
+	gap: 1em;
+	justify-content: start;
+
+	>* {
+		border: solid var(--color-border) 1px;
+		text-decoration: none;
+		color: var(--color-text);
+
+		padding: .25em;
+
+		&.closed, &.closed .tag {
+			color: var(--color-text-weak);
+		}
+	}
+}

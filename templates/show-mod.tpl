@@ -42,7 +42,7 @@
 		{/if}
 		</span> /
 		<span>
-			{$asset["name"] ?? 'Add new Mod'}
+			{$asset["name"]}
 		</span>
 	</h2>
 
@@ -94,7 +94,10 @@
 			<div style="float: right; margin-bottom: 1em;">
 				{if isset($user) && canEditAsset($asset, $user)}
 					<a class="button large shine strikethrough-when-banned strikethrough-when-readonly" href="/edit/mod/?assetid={$asset['assetId']}">Edit</a>&nbsp;
-					<a class="button large shine strikethrough-when-banned strikethrough-when-readonly" href="/edit/release/?modid={$asset['modId']}">Add release</a>
+					<a class="button large shine strikethrough-when-banned strikethrough-when-readonly" href="/edit/release/?modid={$asset['modId']}">Add release</a>&nbsp;
+				{/if}
+				{if isset($user)}
+				<a class="button large shine strikethrough-when-banned strikethrough-when-readonly" data-opens-dialog="report-mod-mdl">Report</a>
 				{/if}
 			</div>
 
@@ -316,6 +319,39 @@
 	</dialog>
 	{/if}
 
+	{if isset($user)}
+	<dialog id="report-mod-mdl">
+		<form class="with-buttons-bottom text-section" method="dialog" data-method="PUT" autocomplete="off" action="/api/v2/mods/{$asset['modId']}/report">
+			<h1>Report Mod</h1>
+			<div style="margin-bottom: 1em;">
+				<p>I (<in>{$user['name']}</in>) would like to report this mod (<i>{$asset["name"]}</i>) for violating the following rule:</p>
+				<select name="category" class="no-chosen" autofocus style="width: 100%;">
+					<option value="">-- Please Select --</option>
+					<? foreach(REPORT_CATEGORIES_MOD as $key => $description): ?>
+					<option value="<?= $key ?>"><?= $description ?></option>
+					<? endforeach; ?>
+				</select>
+				<p class="category-note"></p>
+			</div>
+			
+			<div style="margin-bottom: 1em;">
+				<p>Details on how the rule is being violated:</p>
+				<textarea name="reason" style="width: 100%; min-height: 10em;"></textarea>
+			</div>
+			
+			<p><i>This report will be sent to review by moderators.</i></p>
+
+			<div class="err-container">&nbsp;</div>
+			
+			<input type="hidden" name="at" value="{$user['actionToken']}">
+			<div class="buttons">
+				<button class="button large btndelete shine" onclick="return false;">Report</button>
+				<button class="button large shine" style="margin-left:auto;" formmethod="dialog">Cancel</button>
+			</div>
+		</form>
+	</dialog>
+	{/if}
+
 
 {include file="comments"}
 
@@ -327,6 +363,7 @@
 
 		$(function() {
 			attachCommentHandlers();
+			attachReportModalHandler();
 
 			$("a[href='#follow']").click(function() {
 				const oldCount = parseInt($(".count", $(this)).text());
