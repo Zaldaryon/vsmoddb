@@ -90,6 +90,8 @@ switch($urlparts[0]) { // :ReservedUrlPrefixes
 	case 't':
 		if(is_numeric($urlparts[1] ?? null))
 			exit(require('ticket.php'));
+		else if($urlpath == 't')
+			exit(require('ticket-list-for-moderators.php'));
 		else
 			exit(require('ticket-list.php'));
 

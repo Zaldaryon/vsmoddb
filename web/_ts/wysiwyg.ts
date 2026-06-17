@@ -108,6 +108,68 @@ var tinymceSettingsCmt = {
 	mentions: tinymceSettings.mentions,
 };
 
+
+var tinymceSettingsReport = {
+	menubar: false,
+	plugins: 'paste searchreplace autolink autoresize image link codesample charmap hr pagebreak nonbreaking anchor emoticons advlist lists wordcount imagetools textpattern help spoiler noneditable',
+	external_plugins: tinymceSettings.external_plugins,
+	toolbar: 'bold italic strikethrough | link image emoticons | numlist bullist outdent indent | removeformat | spoiler-add spoiler-remove',
+	toolbar_sticky: true,
+	image_advtab: true,
+	importcss_append: true,
+	min_height: 200 /* @hack: required for mobile */,
+	height: 200,
+	image_caption: true,
+	convert_urls:true,
+	relative_urls:false,
+	remove_script_host:false,
+	tinycomments_mode: 'embedded',
+	paste_data_images: true,
+	content_css: tinymceSettings.content_css,
+	setup: function(editor) {
+		tinymceSettings.setup(editor);
+		editor.on('SetContent', function(e) {
+			if(e.initial) return;
+
+			if(e.paste && wrapNextPaste) {
+				wrapNextPaste = WrapMode.None;
+				//TODO(Rennorb) @correctness: This won't always select the correct one, but its good enough for now.
+				const spoilers  = editor.dom.select('.spoiler');
+				editor.selection.setNode(spoilers[spoilers.length - 1])
+				editor.selection.collapse(false);
+				editor.focus();
+			}
+		})
+	},
+	paste_preprocess: function(editor, args) {
+		const text = args.content;
+		if(!text) return;
+
+		args.content = text.trim().replaceAll('\r\n', '\n'); // fix windows double line endings...
+
+		if(couldBeCrashReport(text)) {
+			if(confirm('Whoa there, looks like you pasted a crash report.\nShould we wrap that for you, so its easier to read for the Modder?\n\nPressing "cancel" (or the equivalent in your language) will paste the text as-is.')) {
+				wrapNextPaste = WrapMode.AsCrashReport;
+			}
+		}
+		else if(text.length >= 1000 && !text.includes('base64,')) {
+			if(confirm('Whoa there, looks like you pasted a lot of text at once.\nShould we wrap that for you, so its easier to read for the Modder?\n\nPressing "cancel" (or the equivalent in your language) will paste the text as-is.')) {
+				wrapNextPaste = WrapMode.WithoutMarkup;
+			}
+		}
+	},
+	paste_postprocess: function(editor, args) {
+		R.trimLeadingEmptyLines(args.node)
+		R.trimTrailingEmptyLines(args.node)
+		if(wrapNextPaste) {
+			const spoiler = wrapAsSpoilerForTMCE(args.node.childNodes, wrapNextPaste === WrapMode.AsCrashReport);
+			args.node.replaceChildren(spoiler);
+		}
+		
+		maybePromptForRelativeLinkRemoval(args.node);
+	},
+};
+
 function maybePromptForRelativeLinkRemoval(node : HTMLElement) {
 	const relativeUrlAnchors = node.querySelectorAll<HTMLAnchorElement>('a[href^="./"], a[href^="../"], a[href^="/"][href*="/issues/"]');
 	if(relativeUrlAnchors.length) {

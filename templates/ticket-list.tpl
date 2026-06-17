@@ -19,7 +19,7 @@ $isModerator = canModerate(null, $user);
 <div class="ticket-list">
 <? foreach($tickets as $ticket): ?>
 	<a href="/t/<?= $ticket['requestId'] ?>"<? if($ticket['stateFlags'] & MOD_REQUEST_FLAG_CLOSED): ?> class="closed"<? endif; ?>>
-		<h3><?= stringify_moderation_request_kind($ticket) ?> <span class="tag"><?= stringify_moderation_request_state_for_user($ticket['stateFlags']) ?></span></h3>
+		<h3><?= stringifyModerationRequestKind($ticket) ?> <span class="tag"><?= stringifyModerationRequestStateForUser($ticket['stateFlags']) ?></span></h3>
 		<div><?= $ticket['requestSearchable'] ?></div>
 	</a>
 <? endforeach; if(empty($tickets)): ?>

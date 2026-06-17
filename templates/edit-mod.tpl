@@ -224,7 +224,7 @@
 </div>
 
 {if $mod['modId'] && canModerate(null, $user)}
-<dialog id="lock-mdl" autofocus="">
+<dialog id="lock-mdl" closedby="any" autofocus="">
 	<form class="with-buttons-bottom" method="dialog" data-method="post" autocomplete="off" action="/api/v2/mods/{$mod['modId']}/lock">
 		<h1>Lock Mod</h1>
 		<p>Are you sure want to lock this mod?</p>

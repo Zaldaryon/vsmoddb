@@ -45,7 +45,7 @@ const MOD_REQUEST_KIND_REPORT_MOD     = 1;
 const MOD_REQUEST_KIND_REPORT_COMMENT = 2;
 
 // 8 bit
-const MOD_REQUEST_FLAG_ASSIGNED = 1 << 0;
+//const MOD_REQUEST_FLAG_ASSIGNED = 1 << 0;
 const MOD_REQUEST_FLAG_SPAM     = 1 << 5;
 const MOD_REQUEST_FLAG_WONTFIX  = 1 << 6;
 const MOD_REQUEST_FLAG_CLOSED   = 1 << 7;
@@ -55,10 +55,11 @@ const MOD_REQUEST_FLAG_CLOSED   = 1 << 7;
  * @param int $flags
  * @return string
  */
-function stringify_moderation_request_state_for_user($flags)
+function stringifyModerationRequestStateForUser($flags)
 {
 	$result = 'Open';
-	if($flags & MOD_REQUEST_FLAG_WONTFIX) $result .= 'Wont Fix';
+	if($flags & MOD_REQUEST_FLAG_WONTFIX) $result = 'Wont Fix';
+	else if($flags & MOD_REQUEST_FLAG_SPAM) $result = 'Closed';
 	else if($flags & MOD_REQUEST_FLAG_CLOSED) $result = 'Solved';
 	return $result;
 }
@@ -67,11 +68,11 @@ function stringify_moderation_request_state_for_user($flags)
  * @param int $flags
  * @return string
  */
-function stringify_moderation_request_state($flags)
+function stringifyModerationRequestState($flags)
 {
 	$result = 'Open';
-	if($flags & MOD_REQUEST_FLAG_WONTFIX) $result .= 'Wont Fix';
-	else if($flags & MOD_REQUEST_FLAG_SPAM) $result .= 'Spam';
+	if($flags & MOD_REQUEST_FLAG_WONTFIX) $result = 'Wont Fix';
+	else if($flags & MOD_REQUEST_FLAG_SPAM) $result = 'Spam';
 	else if($flags & MOD_REQUEST_FLAG_CLOSED) $result = 'Solved';
 	return $result;
 }
@@ -80,7 +81,7 @@ function stringify_moderation_request_state($flags)
  * @param array{kind: int, category: int} $request
  * @return string
  */
-function stringify_moderation_request_kind($request)
+function stringifyModerationRequestKind($request)
 {
 	switch($request['kind']) {
 		case MOD_REQUEST_KIND_REPORT_MOD:

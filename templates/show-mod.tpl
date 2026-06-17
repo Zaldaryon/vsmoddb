@@ -97,7 +97,7 @@
 					<a class="button large shine strikethrough-when-banned strikethrough-when-readonly" href="/edit/release/?modid={$asset['modId']}">Add release</a>&nbsp;
 				{/if}
 				{if isset($user)}
-				<a class="button large shine strikethrough-when-banned strikethrough-when-readonly" data-opens-dialog="report-mod-mdl">Report</a>
+				<a id="report-mod-btn" class="button large shine strikethrough-when-banned strikethrough-when-readonly">Report</a>
 				{/if}
 			</div>
 
@@ -300,7 +300,7 @@
 	<div style="clear:both;"></div>
 
 	{if !empty($user) && !DISABLE_USER_TAGS}
-	<dialog id="add-tag-mdl">
+	<dialog id="add-tag-mdl" closedby="any">
 		<form class="with-buttons-bottom" method="dialog" data-method="post" autocomplete="off" action="/api/v2/mods/{$asset['modId']}/tags">
 			<h1>Add Tags</h1>
 			<p>While anyone can add tags to mods, everyone is also allowed to vote whether or not the tag makes sense.</p>
@@ -320,7 +320,7 @@
 	{/if}
 
 	{if isset($user)}
-	<dialog id="report-mod-mdl">
+	<dialog id="report-mod-mdl" closedby="any">
 		<form class="with-buttons-bottom text-section" method="dialog" data-method="PUT" autocomplete="off" action="/api/v2/mods/{$asset['modId']}/report">
 			<h1>Report Mod</h1>
 			<div style="margin-bottom: 1em;">

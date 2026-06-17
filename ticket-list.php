@@ -25,8 +25,11 @@ $tickets = $con->getAll(<<<SQL
 	SELECT requestId, kind, category, stateFlags, IF(LENGTH(requestSearchable) > 256, CONCAT(SUBSTR(requestSearchable, 1, 256), '...'), requestSearchable) AS requestSearchable
 	FROM moderationRequests
 	WHERE initiatorUserId = {$user['userId']}
+	ORDER BY created DESC
 SQL);
 
+
+$view->assign('pagetitle', $shownUser['userId'] == $user['userId'] ? "My Moderation Requests - " : "Moderation Requests initiated by {$shownUser['name']} - ");
 $view->assign('shownUser', $shownUser, null, true);
 $view->assign('tickets', $tickets, null, true);
 $view->display('ticket-list');

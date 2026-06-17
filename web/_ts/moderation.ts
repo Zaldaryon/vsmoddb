@@ -1,8 +1,15 @@
 function attachReportModalHandler()
 {
+	const buttonEl = R.get('report-mod-btn');
+
 	const dialogEl = R.get('report-mod-mdl') as HTMLDialogElement;
 	const errContainerEl = dialogEl.getElementsByClassName('err-container')[0];
 	const categoryNoteEl = dialogEl.getElementsByClassName('category-note')[0];
+
+	if(!buttonEl || !dialogEl) {
+		console.warn("Missing button or dialog el.");
+		return;
+	}
 
 	dialogEl.querySelector('[name="category"]')!.addEventListener('change', (e) => {
 		switch((e.target as HTMLSelectElement).value) {
@@ -48,6 +55,13 @@ function attachReportModalHandler()
 			dialogEl.getElementsByTagName('button')[0].disabled = false;
 		});
 	});
+
+	buttonEl.addEventListener('click', () => {
+		const ta = dialogEl.getElementsByTagName('textarea')[0];
+		if(ta.style.display !== 'none') createEditor(ta, tinymceSettingsReport);
+
+		dialogEl.showModal();
+	})
 }
 
 function attachCommentReportButtons()

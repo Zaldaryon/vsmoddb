@@ -37,7 +37,7 @@
 	<div class="flex-spacer not-mobile"></div>
 </div>
 
-<dialog id="ban-mdl" autofocus="">
+<dialog id="ban-mdl" closedby="any" autofocus="">
 	<form class="with-buttons-bottom" method="post" autocomplete="off">
 		<h1>Ban {$shownUser['name']}</h1>
 		<p>
@@ -56,7 +56,7 @@
 	</form>
 </dialog>
 
-<dialog id="unban-mdl" autofocus="">
+<dialog id="unban-mdl" closedby="any" autofocus="">
 	<form class="with-buttons-bottom" method="post" autocomplete="off">
 		<h1>Redeem {$shownUser['name']}</h1>
 		<p>
@@ -73,7 +73,7 @@
 	</form>
 </dialog>
 
-<dialog id="warn-mdl" autofocus="">
+<dialog id="warn-mdl" closedby="any" autofocus="">
 	<form class="with-buttons-bottom" method="post" autocomplete="off">
 		<h1>Issue Warning to {$shownUser['name']}</h1>
 		<p>
@@ -99,7 +99,7 @@
 	const reasonEl = formEl.getElementsByTagName('textarea')[0];
 	const untilEl = formEl.querySelector('input[name="until"]');
 	const foreverEl = formEl.querySelector('input[name="forever"]');
-	R.onDOMLoaded(() => createEditor(reasonEl, tinymceSettingsCmt));
+	R.onDOMLoaded(() => createEditor(reasonEl, tinymceSettingsReport));
 	formEl.addEventListener('submit', e => \{
 		if(e.submitter.formMethod === 'dialog') return;
 		if(!reasonEl.value) \{
@@ -117,7 +117,7 @@
 	const mdl = R.get('unban-mdl');
 	const formEl = mdl.getElementsByTagName('form')[0];
 	const reasonEl = formEl.getElementsByTagName('textarea')[0];
-	R.onDOMLoaded(() => createEditor(reasonEl, tinymceSettingsCmt));
+	R.onDOMLoaded(() => createEditor(reasonEl, tinymceSettingsReport));
 	formEl.addEventListener('submit', e => \{
 		if(e.submitter.formMethod === 'dialog') return;
 		if(!reasonEl.value) \{
@@ -130,7 +130,7 @@
 	const mdl = R.get('warn-mdl');
 	const formEl = mdl.getElementsByTagName('form')[0];
 	const reasonEl = formEl.getElementsByTagName('textarea')[0];
-	R.onDOMLoaded(() => createEditor(reasonEl, tinymceSettingsCmt));
+	R.onDOMLoaded(() => createEditor(reasonEl, tinymceSettingsReport));
 	formEl.addEventListener('submit', e => \{
 		if(e.submitter.formMethod === 'dialog') return;
 		if(!reasonEl.value) \{

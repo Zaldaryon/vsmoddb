@@ -28,7 +28,7 @@
 {/if}
 
 {if canModerate($shownUser, $user)}
-<dialog id="history-mdl" class="full-screen">
+<dialog id="history-mdl" class="full-screen" closedby="any">
 	<form  class="with-buttons-bottom">
 		<h1>User activity history (latest 100)</h1>
 		<div class="audit-log-wrap" style="max-height: calc(100vh - 15em)">

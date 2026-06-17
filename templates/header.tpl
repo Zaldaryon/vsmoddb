@@ -93,6 +93,7 @@
 					<nav>
 						<a href="/show/user/{$user['hash']}">Profile</a>
 						<a href="/accountsettings" class="strikethrough-when-readonly">Settings</a>
+						<a href="/t/u/self">Requests</a>
 						<a href="/logout?at={$user['actionToken']}" class="strikethrough-when-readonly">Logout</a>
 					</nav>
 				</span>

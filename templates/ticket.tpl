@@ -15,8 +15,9 @@ $isModerator = canModerate(null, $user);
 		<? endif; ?>
 		</span>
 		/
-		<span><?= $ticket['requestId'] ?></span>
-		<span class="tag"><?= $isModerator ? stringify_moderation_request_state($ticket['stateFlags']) : stringify_moderation_request_state_for_user($ticket['stateFlags']) ?></span>
+		<span><?= stringifyModerationRequestKind($ticket) ?></span>
+		<span class="text-weak">[#<?= $ticket['requestId'] ?>]</span>
+		<span class="tag"><?= $isModerator ? stringifyModerationRequestState($ticket['stateFlags']) : stringifyModerationRequestStateForUser($ticket['stateFlags']) ?></span>
 		<? if($isModerator): ?>
 		<p class="by-user">By <a href="/show/user/<?= $ticket['initiatorHash'] ?>"><?= escapeHtml($ticket['initiatorName']) ?></a></p>
 		<? endif; ?>
@@ -49,7 +50,7 @@ $isModerator = canModerate(null, $user);
 </form>
 
 <script nonce="<?= $cspNonce ?>">
-$(function() { createEditor(R.get('resolve-reason'), tinymceSettingsCmt); });
+$(function() { createEditor(R.get('resolve-reason'), tinymceSettingsReport); });
 </script>
 <? endif; ?>
 

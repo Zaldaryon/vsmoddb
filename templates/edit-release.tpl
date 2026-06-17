@@ -159,7 +159,7 @@
 </div>
 
 {if $release['assetId']}
-<dialog id="retract-mdl" autofocus="">
+<dialog id="retract-mdl" closedby="any" autofocus="">
 	<form class="with-buttons-bottom" method="dialog" data-method="put" action="/api/v2/mods/{$mod['modId']}/releases/{$release['releaseId']}/retraction" autocomplete="off">
 		{if !$release['retractionReason']}
 			<h1>Retract Release</h1>
