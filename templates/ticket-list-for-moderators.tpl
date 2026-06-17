@@ -22,18 +22,22 @@
 			<div class="ticket-list">
 			<? foreach($mod['reports'] as $ticket): ?>
 				<a href="/t/<?= $ticket['requestId'] ?>">
-					<h3><?= stringifyModerationRequestKind($ticket) ?></h3>
+					<h4><?= stringifyModerationRequestKind($ticket) ?></h4>
 					<div><?= $ticket['requestSearchable'] ?></div>
 				</a>
-			<? endforeach; if(empty($mod['reports'])): ?>
-				<div>
-					<h3>Nothing Here</h3>
-					<div>No requests here right now.</div>
-				</div>
-			<? endif; ?>
+			<? endforeach; ?>
 			</div>
 		</div>
-	<? endforeach; ?>
+	<? endforeach; if(empty($reportedMods)): ?>
+		<div>
+			<div>
+				<div>
+					<h3>Nothing here.</h3>
+					<p>No reports here.</p>
+				</div>
+			</div>
+		</div>
+	<? endif; ?>
 	</div>
 </div>
 

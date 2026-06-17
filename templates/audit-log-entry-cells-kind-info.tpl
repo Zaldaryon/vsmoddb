@@ -243,24 +243,24 @@ case AUDIT_LOG_KIND_FILE_CREATE: ?>
 
 
 case AUDIT_LOG_KIND_FILE_DELETE: ?>
-<td>Created Report</td>
+<td>Deleted File</td>
 <td><?= escapeHtml($logEntry['info']) ?></td>
 	<? break;
 
 
 case AUDIT_LOG_KIND_REPORT_CREATE: ?>
-	<td>Deleted File</td>
-	<td><?= escapeHtml($logEntry['info']) ?></td>
+	<td>Created Report</td>
+	<td><?= $logEntry['info'] /* @security: sanitized on ingest */ ?></td>
 		<? break;
 
 
 case AUDIT_LOG_KIND_REPORT_RESOLVE: ?>
 	<td><? switch($logEntry['flags'] & AUDIT_LOG_FLAGS_MASK_RESOLUTION) {
-		case AUDIT_LOG_FLAG_ACCEPTED: echo 'Accepted Team Invite'; break;
-		case AUDIT_LOG_FLAG_REJECTED: echo 'Rejected Team Invite'; break;
-		case AUDIT_LOG_FLAG_ABORTED:  echo 'Aborted Team Member Invite'; break;
+		case AUDIT_LOG_FLAG_SOLVED:   echo 'Solved Report'; break;
+		case AUDIT_LOG_FLAG_WONT_FIX: echo 'Closed Report'; break;
+		case AUDIT_LOG_FLAG_SPAM:     echo 'Closed Report as Spam'; break;
 	} ?></td>
-	<td><?= escapeHtml($logEntry['info']) ?></td>
+	<td><?= $logEntry['info'] /* @security: sanitized on ingest */ ?></td>
 		<? break;
 
 

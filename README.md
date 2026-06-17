@@ -305,7 +305,15 @@ String example: http://mods.vintagestory.at/api/mod/carrycapacity
 	- `403`: List of ids contains notifications that do not belong to the current user.
 	- `200`: Notifications were marked as read if they exist.
 
-### /api/v2/notifications/settings/followed-mods/{id} `auth`
+### /api/v2/settings/gen-ai `auth`
+- `post`:
+	- Args:
+		- Post arg `{tolerance}` specifies the new tolerance to set, range: 0 to 100. 0 means "don't care".
+			Specifies the amount of 'low effort' reports required for a mod to be hidden for the current user.
+	- `400`: No new value provided or argument is malformed.
+	- `200`: Successfully updated settings.
+
+### /api/v2/settings/notifications/followed-mods/{id} `auth`
 - `post`:
 	- Args:
 		- Path arg `{id}` specifies the target mod id. Specifying an id that is not already followed will follow that mod with specified settings.
@@ -314,7 +322,7 @@ String example: http://mods.vintagestory.at/api/mod/carrycapacity
 	- `400`: No new value provided or argument is malformed.
 	- `200`: Successfully updated settings.
 
-### /api/v2/notifications/settings/followed-mods/{id}/unfollow `auth`
+### /api/v2/settings/notifications/followed-mods/{id}/unfollow `auth`
 - `post`: Path arg `{id}` specifies the target mod id.
 	- `400`: Argument is malformed.
 	- `200`: Successfully unfollowed if mod was followed.

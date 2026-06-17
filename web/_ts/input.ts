@@ -237,3 +237,14 @@ function attachTagVoteButtons(tagsContainerEl : HTMLElement, addTagModalEl : HTM
 		addTagModalEl.close();
 	});
 }
+
+function startSubmissionSpinner(button : HTMLButtonElement) : number
+{
+	button.textContent = 'Submitting..';
+	let dots = 0;
+	const buttonInterval = setInterval(() => {
+		button.textContent = 'Submitting....'.slice(0, 12 + dots);
+		dots = (dots + 1) % 3;
+	}, 300);
+	return buttonInterval;
+}

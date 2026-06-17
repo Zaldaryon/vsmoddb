@@ -1,15 +1,10 @@
-function attachReportModalHandler()
+function attachReportModHandlers()
 {
-	const buttonEl = R.get('report-mod-btn');
+	const buttonEl = R.get('report-mod-btn')!;
 
 	const dialogEl = R.get('report-mod-mdl') as HTMLDialogElement;
 	const errContainerEl = dialogEl.getElementsByClassName('err-container')[0];
 	const categoryNoteEl = dialogEl.getElementsByClassName('category-note')[0];
-
-	if(!buttonEl || !dialogEl) {
-		console.warn("Missing button or dialog el.");
-		return;
-	}
 
 	dialogEl.querySelector('[name="category"]')!.addEventListener('change', (e) => {
 		switch((e.target as HTMLSelectElement).value) {
@@ -34,7 +29,7 @@ function attachReportModalHandler()
 		}
 
 		if(!reason || reason.length < 100) {
-			R.markAsErrorElement(form.querySelector('[name="reason"]')!);
+			R.markAsErrorElement(form.getElementsByClassName('tox-tinymce')[0] as HTMLElement);
 			errContainerEl.textContent = 'Please provide substantial reasoning for your report.';
 			return false;
 		}
@@ -62,9 +57,4 @@ function attachReportModalHandler()
 
 		dialogEl.showModal();
 	})
-}
-
-function attachCommentReportButtons()
-{
-
 }

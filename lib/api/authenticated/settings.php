@@ -6,13 +6,11 @@
 switch($urlparts[0]) {
 	case 'gen-ai':
 		validateMethod('POST');
-		
-		$tolerance = filter_input(INPUT_POST, 'tolerance', FILTER_VALIDATE_INT, [ 'options' => [ 'min' => -1, 'max' => 99 ] ]);
+
+		$tolerance = filter_input(INPUT_POST, 'tolerance', FILTER_VALIDATE_INT, [ 'options' => [ 'min' => 0, 'max' => 99 ] ]);
 		if($tolerance === false)   fail(400, ['reason' => 'Malformed tolerance param.']);
 
-		//NOTE(Rennorb): The api is cleaner if the 'don't care' value is -1, the internal storage however is 
-		// 'don't care' === 0 because zero is a better default value.
-		$tolerance += 1;
+		//NOTE(Rennorb): 0 means "don't care".
 
 		$con->execute("UPDATE users SET genAiTolerance = $tolerance WHERE userId = {$user['userId']}"); // @security: $tolerance is validated to be int, $user['userId'] comes form the database and is int, therefore sql inert.
 

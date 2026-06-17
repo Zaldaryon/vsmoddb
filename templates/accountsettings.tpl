@@ -101,7 +101,7 @@ function updateGenAiLabel(value)
 updateGenAiLabel(genaiInputEl.value);
 genaiInputEl.addEventListener('input', e => updateGenAiLabel(e.target.value));
 genaiInputEl.addEventListener('change', e => \{
-	const xhr = $.post('/api/v2/settings/gen-ai', \{ 'tolerance': e.target.value == 100 ? -1 : (parseInt(e.target.value) - 1) })
+	const xhr = $.post('/api/v2/settings/gen-ai', \{ 'tolerance': e.target.value == 100 ? 0 : parseInt(e.target.value) })
 	R.attachDefaultFailHandler(xhr, 'Failed to change tolerance setting');
 });
 </script>

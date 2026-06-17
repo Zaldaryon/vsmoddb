@@ -40,8 +40,8 @@ case AUDIT_LOG_KIND_RELEASE_CHANGE_RETRACTION: ?>
 	<? break;
 
 case AUDIT_LOG_KIND_COMMENT_CREATE: ?>
-	<td><a href="/show/mod/<?= $logEntry['assetId'] ?>#cmt-<?= $logEntry['referenceId'] ?>"><?= escapeHtml($logEntry['referencedName']) ?></a></td>
-		<? break;
+<td><a href="/show/mod/<?= $logEntry['assetId'] ?>#cmt-<?= $logEntry['referenceId'] ?>"><?= escapeHtml($logEntry['referencedName']) ?></a></td>
+	<? break;
 case AUDIT_LOG_KIND_COMMENT_DELETE:
 case AUDIT_LOG_KIND_COMMENT_EDIT: ?>
 <td><a href="/show/mod/<?= $logEntry['assetId'] ?>#cmt-<?= $logEntry['referenceId'] ?>">Comment on <?= escapeHtml($logEntry['referencedName']) ?></a></td>
@@ -59,5 +59,14 @@ case AUDIT_LOG_KIND_USER_REDEEM: ?>
 case AUDIT_LOG_KIND_FILE_CREATE:
 case AUDIT_LOG_KIND_FILE_DELETE: ?>
 <td>-</td>
+	<? break;
+
+case AUDIT_LOG_KIND_REPORT_CREATE:
+case AUDIT_LOG_KIND_REPORT_RESOLVE: ?>
+<td><a href="/t/<?= $logEntry['referenceId'] ?>">Report #<?= $logEntry['referenceId'] ?></a></td>
+	<? break;
+
+default: ?>
+<td></td>
 	<? break;
 } ?>

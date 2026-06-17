@@ -255,7 +255,12 @@ function destroyEditor($elem) : void {
 	});
 }
 
-function getEditorContents($elem) : string {
+function getEditorContent($elem) : string {
 	tinyMCE.triggerSave();
 	return $elem.val();
+}
+
+
+function clearEditorContent(el : HTMLTextAreaElement) {
+	tinyMCE.get(el.id).setContent('');
 }

@@ -117,7 +117,7 @@ function attachCommentHandlers() {
 		const editorWrapper = $(this).parents(".comment.comment-editor")[0] as HTMLElement;
 		
 		const editorTAEl = editorWrapper.getElementsByTagName("textarea")[0];
-		const content = getEditorContents($(editorTAEl));
+		const content = getEditorContent($(editorTAEl));
 		if(!content) return;
 
 		const button = e.target as HTMLButtonElement;
@@ -308,23 +308,85 @@ function attachCommentHandlers() {
 		return false;
 	}
 
-	function clickDelete(e : MouseEvent)
+	function clickHide(e : MouseEvent)
 	{
 		e.preventDefault();
-		if (confirm("Are you sure you want to delete this comment?")) {
+		if (confirm("Are you sure you want to hide this comment?")) {
 			const $comment = $(this).parents(".comment");
 			$comment.hide();
 
 			const commentId = $comment[0].id.split('-')[1];
 			const xhr = $.ajax({ url: `/api/v2/comments/${commentId}?at=`+actiontoken, method: 'DELETE'})
-			R.attachDefaultFailHandler(xhr, 'Failed to delete comment')
+			R.attachDefaultFailHandler(xhr, 'Failed to hide comment')
 				.fail(() => $comment.show()); // Make it visible again if we failed to delete it, so the user may retry.
 		}
 	}
 
+	const reportDialogEl = R.get('report-cmt-mdl') as HTMLDialogElement;
+	const reportErrContainerEl = reportDialogEl.getElementsByClassName('err-container')[0];
+
+	attachDialogSendHandler(reportDialogEl, (form, data) => {
+		reportErrContainerEl.innerHTML = '&nbsp;';
+
+		if(!data.get('category')) {
+			R.markAsErrorElement(form.querySelector('[name="category"]')!);
+			return false;
+		}
+
+		const reason = data.get('reason') as string | null;
+		if(reason) {
+			reason.trim();
+			data.set('reason', reason);
+		}
+
+		if(!reason || reason.length < 100) {
+			R.markAsErrorElement(form.getElementsByClassName('tox-tinymce')[0] as HTMLElement);
+			reportErrContainerEl.textContent = 'Please provide substantial reasoning for your report.';
+			return false;
+		}
+
+		return true;
+	}, (jqXHR) => {
+		const submitButton = reportDialogEl.getElementsByTagName('button')[0];
+		//startSubmissionSpinner(submitButton); //TODO
+
+		R.attachDefaultFailHandler(jqXHR, "Failed to report comment", (err) => {
+			if(jqXHR.status == 429) // Too many requests. Special case where we don't escape.
+				reportErrContainerEl.innerHTML = err;
+			else
+				reportErrContainerEl.textContent = err;
+			return true;
+		})
+		.done(() => {
+			const link = jqXHR.getResponseHeader('Location')!;
+			R.addMessage(MSG_CLASS_OK, `Your report has been submitted (<a href="${link}" target="_blank">link</a>).`, false)
+			reportDialogEl.close();
+			submitButton.disabled = false;
+		});
+	});
+
+	function clickReport(e : MouseEvent)
+	{
+		e.preventDefault();
+
+		const commentId = $(this).parents(".comment")[0].id.split('-')[1];
+		reportDialogEl.getElementsByTagName('form')[0].action = `/api/v2/comments/${commentId}/report`;
+
+		reportDialogEl.getElementsByTagName('select')[0].value = '';
+
+		const ta = reportDialogEl.getElementsByTagName('textarea')[0];
+		if(ta.style.display !== 'none') createEditor(ta, tinymceSettingsReport);
+		else clearEditorContent(ta);
+
+		reportErrContainerEl.innerHTML = '&nbsp;';
+
+		reportDialogEl.showModal();
+	}
+
 	$(container).on("click", 'a[href="#r"]', clickRespond);
 	$(container).on("click", 'a[href="#e"]', clickEdit);
-	$(container).on("click", 'a[href="#d"]', clickDelete);
+	$(container).on("click", 'a[href="#h"]', clickHide);
+	$(container).on("click", 'a[href="#p"]', clickReport);
 	$(container).on("click", 'a[href^="#cmt-"]', highlightClickedEl);
 
 	//
@@ -373,7 +435,7 @@ function attachCommentHandlers() {
 		button.addEventListener('click', (e) => {
 			e.preventDefault();
 
-			var content = getEditorContents($(editorTAEl));
+			var content = getEditorContent($(editorTAEl));
 			saveCallback(button, content, formEl, editorTAEl);
 		});
 	}
@@ -389,7 +451,7 @@ function attachCommentHandlers() {
 <div id="cmt-${commentId}" class="editbox comment${responseDepth ? ' rsp' : ''}" data-order="${responseTargetOrder}" data-stamp="${Date.now()}"${responseDepth ? ' data-d="'+responseDepth+'"' : ''} data-cldn="0">
 	<div class="title">
 		<span><a style="text-decoration:none;" class="cmt-pinner" href="#cmt-${commentId}"><i class="bx bx-link-alt"></i></a> <a href="${userUrl}">${userName}</a>, just now</span>
-		<span class="buttons">(<a href="#r" onclick="return false;">respond</a>&nbsp;<a href="#e" onclick="return false;">edit</a>&nbsp;<a href="#d" onclick="return false;">delete</a>)</span>
+		<span class="buttons">(<a href="#r" onclick="return false;">respond</a>&nbsp;<a href="#e" onclick="return false;">edit</a>&nbsp;<a href="#h" onclick="return false;">hide</a>&nbsp;<a href="#p" onclick="return false;">report</a>)</span>
 	</div>
 	<div class="body">${safeBody}</div>
 </div>
@@ -398,16 +460,5 @@ function attachCommentHandlers() {
 		attachSpoilerToggle($('.spoiler-toggle', $(cmt)));
 
 		return cmt;
-	}
-
-	function startSubmissionSpinner(button : HTMLButtonElement) : number
-	{
-		button.textContent = 'Submitting..';
-		let dots = 0;
-		const buttonInterval = setInterval(() => {
-			button.textContent = 'Submitting....'.slice(0, 12 + dots);
-			dots = (dots + 1) % 3;
-		}, 300);
-		return buttonInterval;
 	}
 }

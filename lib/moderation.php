@@ -31,6 +31,7 @@ const REPORT_CATEGORIES_MOD = [
 const REPORT_CATEGORY_COMMENT_DISCRIMINATION = 1;
 const REPORT_CATEGORY_COMMENT_SPAM           = 2;
 const REPORT_CATEGORY_COMMENT_PIRACY         = 3;
+// :MaxReportCategoryComment
 
 const REPORT_CATEGORIES_COMMENT = [
 	REPORT_CATEGORY_COMMENT_DISCRIMINATION => "Defamation, bullying, obscenity, discrimination, provocations.",

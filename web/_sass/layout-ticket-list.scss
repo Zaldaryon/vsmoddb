@@ -12,6 +12,8 @@
 
 		padding: .25em;
 
+		background-color: var(--color-mod-bg);
+
 		&.closed, &.closed .tag {
 			color: var(--color-text-weak);
 		}
@@ -33,15 +35,15 @@
 			flex-wrap: nowrap;
 			gap: .5em;
 
-			margin-bottom: .5em;
-
 			text-decoration: none;
 			color: var(--color-text);
 			&:hover {
 				color: var(--color-link-active);
 			}
 
-			border: solid var(--color-border) 1px;
+			border-bottom: solid var(--color-border) 1px;
+
+			background-color: var(--color-mod-bg);
 
 			>img {
 				width: 5em;
@@ -59,6 +61,10 @@
 					flex-grow: 1;
 				}
 			}
+		}
+
+		>.ticket-list {
+			padding: .5em;
 		}
 	}
 }

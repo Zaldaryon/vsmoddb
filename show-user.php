@@ -41,9 +41,11 @@ foreach ($userMods as &$mod) {
 unset($mod);
 
 if (canModerate($shownUser, $user)) {
+	require $config['basepath'] . 'lib/moderation.php';
+
 	$logs = $con->getAll("
 		SELECT l.created, l.kind, l.flags, l.referenceId,
-		COALESCE(l.info, c.textShort) AS info,
+		COALESCE(l.info, c.textShort, IF(l.kind = ".AUDIT_LOG_KIND_REPORT_RESOLVE.", req.resolution, req.request)) AS info,
 		HEX(u.hash) AS `hash`,
 		COALESCE(ma.name, u.name) AS referencedName,
 		COALESCE(c.assetId, m.assetId, r.assetId, l.referenceId) AS assetId
@@ -55,6 +57,7 @@ if (canModerate($shownUser, $user)) {
 		LEFT JOIN modReleases r on l.kind IN (".AUDIT_LOG_KIND_RELEASE_CREATE.','.AUDIT_LOG_KIND_RELEASE_RETRACT.','.AUDIT_LOG_KIND_RELEASE_CHANGE_IDENTIFIER.','.AUDIT_LOG_KIND_RELEASE_CHANGE_VERSION.','.AUDIT_LOG_KIND_RELEASE_CHANGE_COMPAT.','.AUDIT_LOG_KIND_RELEASE_CHANGE_FILE.','.AUDIT_LOG_KIND_RELEASE_CHANGE_CHANGELOG.','.AUDIT_LOG_KIND_RELEASE_CHANGE_RETRACTION.") AND r.releaseId = l.referenceId
 		LEFT JOIN comments c ON l.kind IN (".AUDIT_LOG_KIND_COMMENT_CREATE.','.AUDIT_LOG_KIND_COMMENT_DELETE.','.AUDIT_LOG_KIND_COMMENT_EDIT.") AND c.commentId = l.referenceId
 		LEFT JOIN mods rm ON rm.modId = r.modId
+		LEFT JOIN moderationRequests req ON l.kind IN (".AUDIT_LOG_KIND_REPORT_CREATE.','.AUDIT_LOG_KIND_REPORT_RESOLVE.") AND req.requestId = l.referenceId
 		LEFT JOIN assets ma ON ma.assetId = COALESCE(m.assetId, c.assetId, rm.assetId)
 		WHERE l.initiatorUserId = {$shownUser['userId']}
 		ORDER BY l.created DESC
