@@ -197,7 +197,7 @@ function queryModSearchForModCards($searchParams)
  */
 function queryModSearch($searchParams)
 {
-	global $con, $user;
+	global $con, $user, $config;
 
 	$joinClauses = '';
 	$whereClauses = '';
@@ -206,6 +206,14 @@ function queryModSearch($searchParams)
 	// Join Params need to be inserted between previous join params and where params because JOIN happens before WHERE.
 	// This is the index in the params array where the next join param goes.
 	$joinParamsOffset = 0;
+	$havingClauses = '';
+
+	if(!empty($user['genAiTolerance'])) {
+		require($config['basepath'].'lib/moderation.php');
+
+		$joinClauses = 'LEFT JOIN moderationRequests req ON req.referenceId = m.modId AND (req.kind, req.category) = ('.MOD_REQUEST_KIND_REPORT_MOD.', '.REPORT_CATEGORY_MOD_LOW_EFFORT_AI.') AND resolved IS NULL ';
+		$havingClauses = 'HAVING COUNT(req.requestId) < '.$user['genAiTolerance']; // @security: $user['genAiTolerance'] comes from the database and is numeric, therefore sql inert.
+	}
 
 	$orderBy = VALID_ORDER_BY_COLUMNS[$searchParams['order'][0]][0].' '.$searchParams['order'][1];
 
@@ -427,6 +435,7 @@ function queryModSearch($searchParams)
 		$joinClauses
 		$whereClauses
 		$groupBy
+		$havingClauses
 		ORDER BY $orderBy
 		$limitClause
 	", $sqlParams);
