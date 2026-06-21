@@ -20,6 +20,7 @@ $visibleCommentCount = $showDeleted ? count($comments) : array_reduce($comments,
 				<option value="<?= $key ?>"><?= $description ?></option>
 				<? endforeach; ?>
 			</select>
+			<p style="margin-top: .5em;"><i>(see the <a href="/terms" target="_blank">terms of use</a> page for more details on our rules)</i></p>
 		</div>
 		
 		<div style="margin-bottom: 1em;">
@@ -33,7 +34,7 @@ $visibleCommentCount = $showDeleted ? count($comments) : array_reduce($comments,
 		
 		<input type="hidden" name="at" value="{$user['actionToken']}">
 		<div class="buttons">
-			<button class="button large btndelete shine" onclick="return false;">Report</button>
+			<button class="button large btndelete shine btn-submit" onclick="return false;">Report</button>
 			<button class="button large shine" style="margin-left:auto;" formmethod="dialog">Cancel</button>
 		</div>
 	</form>

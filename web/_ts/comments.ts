@@ -122,9 +122,9 @@ function attachCommentHandlers() {
 
 		const button = e.target as HTMLButtonElement;
 		button.disabled = true; // prevent double submission by impatient user
-		const prevButtonText = button.textContent;
+		const prevButtonText = button.textContent!;
 
-		const spinnerInterval = startSubmissionSpinner(button);
+		startSubmissionSpinner(button);
 
 		const xhr = $.ajax({ url: `/api/v2/mods/${modId}/comments?at=`+actiontoken, method: 'PUT', data: content, contentType: 'text/html', dataType: 'text' })
 			.done(function (response : string, _, jqXHR : jqXHR) {
@@ -138,13 +138,11 @@ function attachCommentHandlers() {
 
 				temporaryHighlight(cmt);
 
-				clearInterval(spinnerInterval);
-				button.textContent = prevButtonText;
+				stopSubmissionSpinner(button, prevButtonText);
 				button.disabled = false;
 			})
 			.fail(function() {
-				clearInterval(spinnerInterval);
-				button.textContent = prevButtonText;
+				stopSubmissionSpinner(button, prevButtonText);
 				button.disabled = false;
 			});
 		R.attachDefaultFailHandler(xhr, 'Failed to submit comment');
@@ -229,12 +227,12 @@ function attachCommentHandlers() {
 
 		createInlineEditor(editorWrapperEl.getElementsByClassName('body')[0], 'Add Response', '', (button, content, form, editor) => {
 			button.disabled = true; // prevent impatience
-			const prevButtonText = button.textContent;
-			const spinnerInterval = startSubmissionSpinner(button);
+			const prevButtonText = button.textContent!;
+			startSubmissionSpinner(button);
 
 			const xhr = $.ajax({ url: `/api/v2/mods/${modId}/comments?response-to=${targetCommentId}&at=`+actiontoken, method: 'PUT', data: content, contentType: 'text/html', dataType: 'text' })
 				.done(function(response, _, jqXHR : jqXHR) {
-					clearInterval(spinnerInterval);
+					stopSubmissionSpinner(button, "Ok")
 
 					const cmtFrag = jqXHR.getResponseHeader('Location')!;  // the response contains the newly generated comment id in the location header as a fragment link (e.g. `#cmt-213`)
 					const commentId = cmtFrag.slice(5) // slice off the #cmt- from the link
@@ -255,8 +253,7 @@ function attachCommentHandlers() {
 					temporaryHighlight(cmt);
 				})
 				.fail(function() {
-					clearInterval(spinnerInterval);
-					button.textContent = prevButtonText;
+					stopSubmissionSpinner(button, prevButtonText)
 					button.disabled = false;
 				});
 			R.attachDefaultFailHandler(xhr, 'Failed to submit comment');
@@ -347,10 +344,11 @@ function attachCommentHandlers() {
 
 		return true;
 	}, (jqXHR) => {
-		const submitButton = reportDialogEl.getElementsByTagName('button')[0];
-		//startSubmissionSpinner(submitButton); //TODO
+		const submitButton = reportDialogEl.getElementsByClassName('btn-submit')[0] as HTMLButtonElement;
+		startSubmissionSpinner(submitButton);
 
 		R.attachDefaultFailHandler(jqXHR, "Failed to report comment", (err) => {
+			stopSubmissionSpinner(submitButton, "Report");
 			if(jqXHR.status == 429) // Too many requests. Special case where we don't escape.
 				reportErrContainerEl.innerHTML = err;
 			else
@@ -361,6 +359,7 @@ function attachCommentHandlers() {
 			const link = jqXHR.getResponseHeader('Location')!;
 			R.addMessage(MSG_CLASS_OK, `Your report has been submitted (<a href="${link}" target="_blank">link</a>).`, false)
 			reportDialogEl.close();
+			stopSubmissionSpinner(submitButton, "Report");
 			submitButton.disabled = false;
 		});
 	});

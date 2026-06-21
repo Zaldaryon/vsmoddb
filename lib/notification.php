@@ -98,6 +98,12 @@ switch($notification['kind']) {
 		forceRedirect('/moderate/user/'.$userFrag);
 		exit();
 
+	case NOTIFICATION_REQUEST_RESOLVED:
+		if (!DB_READONLY) $con->execute('UPDATE notifications SET `read` = 1 WHERE notificationId = ?', [$notification['notificationId']]);
+		
+		forceRedirect('/t/'.$notification['recordId']);
+		exit();
+
 	case NOTIFICATION_ONEOFF_MALFORMED_RELEASE:
 		forceRedirect("/edit/release?assetid={$notification['recordId']}");
 		exit();

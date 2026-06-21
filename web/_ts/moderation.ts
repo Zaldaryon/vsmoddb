@@ -47,7 +47,7 @@ function attachReportModHandlers()
 			const link = jqXHR.getResponseHeader('Location')!;
 			R.addMessage(MSG_CLASS_OK, `Your report has been submitted (<a href="${link}" target="_blank">link</a>).`, false)
 			dialogEl.close();
-			dialogEl.getElementsByTagName('button')[0].disabled = false;
+			(dialogEl.getElementsByClassName('btn-submit')[0] as HTMLButtonElement).disabled = false;
 		});
 	});
 

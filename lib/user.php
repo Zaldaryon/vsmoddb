@@ -34,6 +34,7 @@ const NOTIFICATION_MOD_OWNERSHIP_TRANSFER_RESOLVED = 10;
 const NOTIFICATION_WARNING_RECEIVED       = 16;
 const NOTIFICATION_WARNING_ACKNOWLEDGED   = 17;
 const NOTIFICATION_RESPONDED_TO_COMMENT   = 20;
+const NOTIFICATION_REQUEST_RESOLVED       = 25;
 
 const NOTIFICATION_ONEOFF_MALFORMED_RELEASE = 64 + 0; // :LegacyMalformedModInfo
 
@@ -309,6 +310,10 @@ function loadNotifications($loadAll)
 
 			case NOTIFICATION_WARNING_ACKNOWLEDGED:
 				$notification['text'] = "{$userNames[$recordId]} has acknowledged your warning.";
+				break;
+
+			case NOTIFICATION_REQUEST_RESOLVED:
+				$notification['text'] = "Your request #{$recordId} got resolved.";
 				break;
 
 			case NOTIFICATION_ONEOFF_MALFORMED_RELEASE:

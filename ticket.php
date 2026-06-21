@@ -33,6 +33,10 @@ if(!empty($_POST['resolution'])) {
 
 	$oldMsgCount = count($messages);
 
+	if($ticket['stateFlags'] & MOD_REQUEST_FLAG_CLOSED) {
+		addMessage(MSG_CLASS_ERROR, 'Ticket was already closed, sorry.'); // @hack, but good enough to prevent accidents.
+	}
+
 	switch($_POST['resolution']) {
 		case 'solved':
 			$newState = MOD_REQUEST_FLAG_CLOSED;
@@ -62,6 +66,10 @@ if(!empty($_POST['resolution'])) {
 		$con->startTrans();
 
 		$con->execute('UPDATE moderationRequests SET stateFlags = stateFlags | ?, resolved = NOW(), resolverUserId = ?, resolution = ? WHERE requestId = ?', [$newState, $user['userId'], $reason, $requestId]);
+
+		if(!empty($_POST['sendNotification'])) {
+			$con->execute('INSERT INTO notifications (kind, userId, recordId) VALUES ('.NOTIFICATION_REQUEST_RESOLVED.', ?, ?) ', [$ticket['initiatorUserId'], $requestId]);
+		}
 
 		logAuditEvent(AUDIT_LOG_KIND_REPORT_RESOLVE, $requestId, null, $logFlags | AUDIT_LOG_FLAG_MODACTION);
 

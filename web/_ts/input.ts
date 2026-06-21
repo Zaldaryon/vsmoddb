@@ -238,7 +238,7 @@ function attachTagVoteButtons(tagsContainerEl : HTMLElement, addTagModalEl : HTM
 	});
 }
 
-function startSubmissionSpinner(button : HTMLButtonElement) : number
+function startSubmissionSpinner(button : HTMLButtonElement)
 {
 	button.textContent = 'Submitting..';
 	let dots = 0;
@@ -246,5 +246,11 @@ function startSubmissionSpinner(button : HTMLButtonElement) : number
 		button.textContent = 'Submitting....'.slice(0, 12 + dots);
 		dots = (dots + 1) % 3;
 	}, 300);
-	return buttonInterval;
+	button.dataset.interval = String(buttonInterval);
+}
+
+function stopSubmissionSpinner(button : HTMLButtonElement, ...content : (Node|string)[])
+{
+	clearInterval(parseInt(button.dataset.interval!))
+	button.replaceChildren(...content)
 }

@@ -68,7 +68,7 @@ _define_default("MOD_SEARCH_VALIDATE_LIMIT_MIN", 1);
 _define_default("MOD_SEARCH_VALIDATE_LIMIT_MAX", 20);
 
 _define_default("MOD_REPORT_DEDUPLICATION_TIMESPAN", 7); // days
-_define_default("MOD_REPORT_LIMIT_PER_WEEK", 5); // counts open and dismissed reports, but not accepted ones.
+_define_default("MOD_REPORT_LIMIT_PER_WEEK", 10); // counts open and dismissed reports, but not accepted ones.
 
 _define_default("COMMENT_REPORT_DEDUPLICATION_TIMESPAN", 7); // days
 _define_default("COMMENT_REPORT_LIMIT_PER_WEEK", 50); // counts open and dismissed reports, but not accepted ones.

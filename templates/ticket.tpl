@@ -45,6 +45,7 @@ $isModerator = canModerate(null, $user);
 	<div>
 		<button class="button large shine" name="resolution" value="solved">Close as 'Solved'</button>
 		<button class="button large shine" name="resolution" value="wontfix">Close as 'Wont Fix'</button>
+		<label for="cb-send-notification" style="line-height: 3em; user-select: none;"><label class="toggle" for="cb-send-notification"><input id="cb-send-notification" type="checkbox" name="sendNotification" value="1"></label> Send notification to user</label>
 		<button class="button large btndelete shine" name="resolution" value="spam" style="margin-left:auto;">Dismiss as Spam</button>
 	</div>
 </form>

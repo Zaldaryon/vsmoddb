@@ -331,7 +331,8 @@
 					<option value="<?= $key ?>"><?= $description ?></option>
 					<? endforeach; ?>
 				</select>
-				<p class="category-note"></p>
+				<p class="category-note" style="margin-top: .5em;"></p>
+				<p><i>(see the <a href="/terms" target="_blank">terms of use</a> page for more details on our rules)</i></p>
 			</div>
 			
 			<div style="margin-bottom: 1em;">
@@ -345,7 +346,7 @@
 			
 			<input type="hidden" name="at" value="{$user['actionToken']}">
 			<div class="buttons">
-				<button class="button large btndelete shine" onclick="return false;">Report</button>
+				<button class="button large btndelete shine btn-submit" onclick="return false;">Report</button>
 				<button class="button large shine" style="margin-left:auto;" formmethod="dialog">Cancel</button>
 			</div>
 		</form>
