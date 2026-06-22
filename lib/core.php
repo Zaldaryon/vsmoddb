@@ -189,7 +189,7 @@ function sanitizeHtml($text)
 	// Extremely rudimentary check to not ingest expanded spoilers after editing a comment, but good enough for that case.
 	$text = str_replace('class="spoiler-toggle expanded"', 'class="spoiler-toggle"', $text);
 
-	$text = htmLawed($text, array('tidy' => 0, 'safe' => 1, 'elements' => '* -script -object -applet -canvas +iframe -video -audio -embed -form', 'schemes' => 'src: http, https, data', 'hook_tag' => "_htmLawed_sanitize_node"));
+	$text = htmLawed($text, array('tidy' => 0, 'safe' => 1, 'elements' => '* -script -style -link -meta -object -applet -canvas +iframe -video -audio -embed -form', 'schemes' => 'src: http, https, data', 'hook_tag' => "_htmLawed_sanitize_node"));
 
 	// Remove inspect-element junk that started to show up:
 	//TODO(Rennorb) @cleanup @brittle
