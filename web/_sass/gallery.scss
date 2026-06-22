@@ -1,0 +1,252 @@
+.gallery {
+	position: relative;
+
+	max-width: min(800px, 100%);
+
+	$navHeight: 64px;
+
+	&.is-fullscreen {
+		position: fixed;
+
+		top: 0; left: 0;
+		width: 100vw;
+		height: 100vh;
+		
+		max-width: none;
+		z-index: 9999;
+
+		>.viewport { height: calc(100vh - $navHeight); }
+
+		background-color: #000;
+	}
+
+	>.viewport {
+		position: relative;
+
+		>.stage {
+			position: relative;
+			display: flex;
+
+			width: var(--gallery-w, 800px);
+			height: var(--gallery-h, 600px);
+			max-width: 100%;
+
+			@at-root .is-fullscreen#{&} {
+				width: 100%;
+				height: 100%;
+			}
+
+			overflow-x: auto;
+			scrollbar-width: none;
+			&::-webkit-scrollbar { display: none; }
+
+			scroll-snap-type: x mandatory;
+			scroll-behavior: smooth;
+			&.manually-dragging {
+				scroll-snap-type: none;
+				scroll-behavior: auto;
+			}
+
+			background: rgba(166, 159, 125, 0.3);
+
+			@at-root .is-fullscreen#{&} {
+				background: transparent;
+			}
+			
+			user-select: none;
+
+			>* {
+				flex: 0 0 100%;
+				height: 100%;
+				scroll-snap-align: start;
+				scroll-snap-stop: always;
+
+				>* {
+					display: block;
+					width: 100%;
+					height: 100%;
+				}
+				>img {
+					object-fit: contain;
+				}
+				>iframe {
+					border: none;
+				}
+			}
+		}
+
+		.ctrl {
+			position: absolute;
+			cursor: pointer;
+
+			border: none;
+			padding: 0;
+
+			background: none;
+			opacity: 0;
+
+			transition: opacity .3s;
+
+			@at-root .gallery:hover > .viewport > .ctrl { opacity: 1; }
+
+			@at-root .is-fullscreen#{&} {
+				opacity: 1;
+			}
+		}
+
+		/* Arrows — transparent full-height hit areas, icon via ::after */
+		>.arr {
+			position: absolute;
+
+			top: 0;
+			bottom: 0;
+			height: 100%; // ? why is this needed
+
+			width: 50%;
+
+			&::after {
+				content: '';
+				position: absolute;
+				
+				top: 50%;
+
+				width: 0;
+				height: 0;
+				border-style: solid;
+				border-width: 5px 9px 5px 0;
+				border-color: transparent white transparent transparent;
+				margin-right: 1px;
+
+				filter: drop-shadow(#000 0 0 5px);
+			}
+
+			&.prev {
+				left: 0;
+
+				&::after {
+					left: 2em;
+					transform: translate(-5px, -50%);
+				}
+			}
+			&.next {
+				right: 0;
+
+				&::after {
+					right: 2em;
+					transform: translate(-5px, -50%) scaleX(-1);
+				}
+			}
+		}
+
+		>.fullscreen {
+			top: 2px;
+			right: 2px;
+
+			width: 32px;
+			height: 32px;
+
+			//TODO(Rennorb) @cleanup: This is larger than it needs to be. still contains all the different fotorama icons.
+			background: url(data:image/png;base64,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) no-repeat 0 -32px;
+
+			@at-root .is-fullscreen#{&} {
+				background-position: -32px -32px; // change icon
+			}
+		}
+	}
+
+	nav {
+		position: relative;
+		display: block;
+
+		$navIndicatorBorderWidth: 2px;
+
+		margin-top: 2px;
+
+		height: $navHeight;
+
+		overflow: hidden;
+		text-align: center;
+
+		>* {
+			position: relative;
+			display: inline-block;
+
+			white-space: nowrap;
+			// collapse whitespace between elements:
+			line-height: 0;
+			font-size: 0;
+
+			>* { // preview images
+				position: relative;
+				display: inline-block;
+
+				width: $navHeight;
+				height: $navHeight;
+
+				margin-right: 2px; // 2px gap accounted for in the js :ThumbGap
+				padding: 0;
+
+				vertical-align: middle;
+
+				cursor: pointer;
+				border: none;
+				outline: none;
+
+				> img {
+					width: 100%;
+					height: 100%;
+					object-fit: cover;
+				}
+	
+				&.video-thumb {
+					> img {
+						filter: brightness(.4);
+					}
+
+					// "play button" via before+after:
+					&::before, &::after {
+						content: '';
+						position: absolute;
+						z-index: 2;
+
+						top: 50%;
+						left: 50%;
+						transform: translate(-50%, -50%);
+					}
+	
+					&::before {
+						width: 0;
+						height: 0;
+						border-style: solid;
+						border-width: 5px 0 5px 9px;
+						border-color: transparent transparent transparent white;
+						margin-left: 1px;
+					}
+	
+					&::after {
+						width: 24px;
+						height: 24px;
+						border-radius: 50%;
+						border: 2px solid white;
+						background: transparent;
+					}
+				}
+
+				&.indicator {
+					position: absolute;
+					top: 0;
+					left: 0;
+			
+					width: $navHeight;
+					height: $navHeight;
+			
+					border: 2px solid #00afea;
+			
+					pointer-events: none;
+			
+					transition: transform .36s cubic-bezier(.1, 0, .25, 1);
+				}
+			}
+		}
+	}
+}

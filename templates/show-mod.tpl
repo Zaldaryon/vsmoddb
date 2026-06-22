@@ -98,17 +98,46 @@
 				{/if}
 			</div>
 
-			<div class="imageslideshow fotorama" data-max-width="min(800px, 100%)" data-max-height="450"{if !empty($asset['trailerVideoUrl'])} data-width="800"{/if} data-autoplay="5000" data-nav="thumbs" data-allowfullscreen="true">
-				{if !empty($asset['trailerVideoUrl'])}
-					<a rel="nofollow" href="{$asset['trailerVideoUrl']}">Trailer Video</a>
-				{/if}
-				{foreach from=$files item=file}
-					<img src="{$file['url']}">
-				{/foreach}
-				{if empty($files) && empty($asset['trailerVideoUrl']) && !empty($asset['logoUrl'])}
-				<img src="{$asset['logoUrl']}">
+			{if !empty($files) || !empty($trailerEmbedUrl)}
+			<div class="gallery" style="--gallery-w:{$galleryWidth}px; --gallery-h:{$galleryHeight}px; float: left; margin-right: 20px;">
+				<div class="viewport">
+					<div class="stage">
+						{if !empty($trailerEmbedUrl)}
+						<div><iframe src="{$trailerEmbedUrl}" allowfullscreen loading="lazy"></iframe></div>
+						{/if}
+						{foreach from=$files item=file}
+						<div><img src="{$file['url']}" loading="lazy"></div>
+						{/foreach}
+						{if empty($files) && empty($trailerEmbedUrl) && !empty($asset['logoUrl'])}
+						<div><img src="{$asset['logoUrl']}" loading="lazy"></div>
+						{/if}
+					</div>
+					{if count($files) + (!empty($trailerEmbedUrl) ? 1 : 0) >= 2}
+					<button class="ctrl arr prev" title="Previous"></button>
+					<button class="ctrl arr next" title="Next"></button>
+					{/if}
+					<button class="ctrl fullscreen" title="Fullscreen"></button>
+				</div>
+				{if count($files) + (!empty($trailerEmbedUrl) ? 1 : 0) >= 2}
+				<nav>
+					<div><?
+						$i = 0;
+						if(!empty($trailerEmbedUrl)) {
+							?><button class="video-thumb" data-i="0"><img src="<?= $trailerThumbUrl ?>" loading="lazy"></button><?
+							$i++;
+						}
+						foreach($files as $file) {
+							?><button data-i="<?= $i ?>"><img src="<?= $file['url'] ?>" loading="lazy"></button><?
+							$i++;
+						}
+						//NOTE(Rennorb): No need for the thumbnail only case, in that case there is only one image and therefore no nav.
+						?>
+						<div class="indicator"></div>
+					?></div>
+				</nav>
 				{/if}
 			</div>
+			{/if}
 
 			<dl class="infobox{if empty($asset['trailerVideoUrl']) && empty($files)} nomedia{/if}">
 				<dt>Tags:</dt>
@@ -327,11 +356,10 @@
 					R.addMessage(MSG_CLASS_ERROR, 'Failed to (un-)follow mod' + (d.reason ? (': '+d.reason) : '.'), true)
 				});
 			});
+
+			initGallery();
 		});
 	</script>
-	<script nonce="{$cspNonce}" type="text/javascript" src="/web/js/jquery.fancybox.min.js" async></script>
-	<link nonce="{$cspNonce}" href="https://cdnjs.cloudflare.com/ajax/libs/fotorama/4.6.4/fotorama.css" rel="stylesheet">
-	<script nonce="{$cspNonce}" type="text/javascript" src="/web/js/fotorama.js?v=2"></script>
 {/capture}
 
 {include file="footer"}

@@ -383,21 +383,6 @@ body.opaque-desc .mod .moddesc {
 	text-align: right;
 }
 
-
-
-.imageslideshow {
-	float: left;
-	max-width: min(800px, 100%);
-	margin-right: 20px;
-}
-
-.fotorama__stage {
-	background: rgba(166, 159, 125, 0.3);
-	border-radius: 0px;
-}
-
-
-
 .stdtable {
 	border: 1px solid gray;
 	border-collapse: collapse;
