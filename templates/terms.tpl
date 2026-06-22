@@ -4,7 +4,7 @@
 <h3>Mod Uploads</h3>
 <p>In submitting a mod, you as the author<sup>2</sup> agree to the following terms:</p>
 <ol>
-	<li>Anego Studios may display, publish and distribute the code, assets and other materials comprised in the mod, free of charge, to any mod user<sup>1</sup>, and that any mod user<sup>1</sup> may use it free of charge. This license will continue indefinitely unless terminated by agreement.</li>
+	<li>Anego Studios may display, publish and distribute the code, assets and other materials that comprise your mod, free of charge, to any mod user<sup>1</sup>, and that any mod user<sup>1</sup> may install and use your mod free of charge. This license will continue indefinitely unless terminated by agreement.</li>
 	<li>You warrant that the mod contains no harmful or malicious code, no material which is defamatory, bullying, offensive, obscene, or pornographic, and no breach of copyright of any other person.</li>
 	<li>Any license terms contained in the mod itself must be compatible with the terms put forth by Anego Studios.</li>
 	<li>A mod must have an English description, but may also have additional descriptions in other languages.</li>
