@@ -857,6 +857,8 @@ function inflateLinks($html)
 	return $result ? substr($result, 6, -7) : ''; // :WrapUnwrapForDomParser
 }
 
+const URL_REGEX = '|https?://[\w.@:/\[\]!$&\'"()*+\-,;%=#?]+|';
+
 /** @param \Dom\Node $node */
 function _inflateWalker($node)
 {
@@ -865,7 +867,7 @@ function _inflateWalker($node)
 	foreach($node->childNodes as $child) {
 		if($child->nodeType === XML_TEXT_NODE) {
 			$newHtml = preg_replace_callback(
-				'#https?://[\w.@:/\[\]!$&\'"()*+,;%=\#?]+#',
+				URL_REGEX,
 				fn($match) => _inflateLink($match[0], true),
 				$child->textContent, -1, $count
 			);
@@ -885,13 +887,13 @@ function _inflateWalker($node)
 		}
 
 		if($child->nodeType === XML_ELEMENT_NODE) {
-			if($child->nodeName === 'a') {
+			if($child->nodeName === 'A') {
 				if(count($child->childNodes) < 2) {
 					$link = $child->attributes->getNamedItem('href');
 					if($link) $link = $link->textContent;
 
 					if(!$link) {
-						if(preg_match('#https?://[\w.@:/\[\]!$&\'"()*+,;%=\#?]+#', $child->textContent, $matches))
+						if(preg_match(URL_REGEX, $child->textContent, $matches))
 							$link = $matches[0];
 					}
 
@@ -936,7 +938,8 @@ function _inflateLink($link, $wrapUnmatchedLink)
 {
 	// https://youtu.be/XNV8SaaDi0o?si=ecgbd8PE_vfFKSDi
 	// https://www.youtube.com/watch?v=vkSP1pNpfEQ&list=PLMWVmegrv0fqF7kQGkQU-d_SBffJUjWIhyou
-	if(preg_match('#youtu(?:be.\w+/.+?v=|\.be/)([\w-]+)#', $link, $matches)) {
+	// https://youtu.be/fo1-OcWmJDM
+	if(preg_match('#youtu(?:be.\w+/.+?v=|\.be/)([\w\-]+)#', $link, $matches)) {
 		$ytid = $matches[1]; // @security: The id is alphanumeric and therefore inert
 		return "<iframe width='100%' height='315' src='https://www.youtube.com/embed/{$ytid}?rel=0&amp;showinfo=0&amp;color=orange&amp;iv_load_policy=3' frameborder='0' allowfullscreen></iframe>";
 	}
