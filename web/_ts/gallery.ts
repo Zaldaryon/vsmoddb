@@ -99,7 +99,7 @@ function initGallery() : void
 		isTriggeredScroll = true;
 		sessionStorage.setItem(storageKey, String(idx));
 
-		slidesEls[idx].scrollIntoView({behavior: 'smooth', block: 'nearest', inline: 'start'});
+		stageEl.scrollLeft = stageEl.offsetWidth * idx;
 
 		updateSelectionIndicator();
 		updateNavArrows();
@@ -215,8 +215,9 @@ function initGallery() : void
 		if(idx > 0 && idx < slidesEls.length) {
 			current = idx;
 
+			isTriggeredScroll = true;
 			selectionIndicatorEl.style.transition = 'none';
-			slidesEls[idx].scrollIntoView({block: 'nearest', inline: 'start', behavior: 'instant'});
+			stageEl.scrollLeft = stageEl.offsetWidth * idx;
 			updateSelectionIndicator();
 			setTimeout(() => { selectionIndicatorEl.style.transition = ''; }, 100); // have to do this because just toggling the style change will be batched and have no effect.
 		}
