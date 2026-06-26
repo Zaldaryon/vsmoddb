@@ -325,7 +325,7 @@
 		<form class="with-buttons-bottom text-section" method="dialog" data-method="PUT" autocomplete="off" action="/api/v2/mods/{$asset['modId']}/report">
 			<h1>Report Mod</h1>
 			<div style="margin-bottom: 1em;">
-				<p>I (<in>{$user['name']}</in>) would like to report this mod (<i>{$asset["name"]}</i>) for violating the following rule:</p>
+				<p>Rule violation to report:</p>
 				<select name="category" class="no-chosen" autofocus style="width: 100%;">
 					<option value="">-- Please Select --</option>
 					<? foreach(REPORT_CATEGORIES_MOD as $key => $description): ?>

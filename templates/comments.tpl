@@ -13,7 +13,7 @@ $visibleCommentCount = $showDeleted ? count($comments) : array_reduce($comments,
 	<form class="with-buttons-bottom text-section" method="dialog" data-method="PUT" autocomplete="off" action="{generated}">
 		<h1>Report Comment</h1>
 		<div style="margin-bottom: 1em;">
-			<p>I (<in>{$user['name']}</in>) would like to report this comment (<i id="cmt-ellipsis">Comment Ellipsis</i>) for violating the following rule:</p>
+			<p>Rule violation to report:</p>
 			<select name="category" class="no-chosen" autofocus style="width: 100%;">
 				<option value="">-- Please Select --</option>
 				<? foreach(REPORT_CATEGORIES_COMMENT as $key => $description): ?>
