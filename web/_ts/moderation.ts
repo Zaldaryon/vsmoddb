@@ -11,6 +11,8 @@ function attachReportModHandlers()
 			case '9':
 				categoryNoteEl.innerHTML = 'This category may not be immediately investigated by moderators, but enables users to hide reported mods as per their <a href="/accountsettings#gen-ai" target="_blank">configured tolerance</a>.';
 				break;
+			default:
+				categoryNoteEl.innerHTML = '';
 		}
 	});
 
