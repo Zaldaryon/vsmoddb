@@ -47,7 +47,7 @@
 <p><small>Changes apply immediately.</small></p>
 
 <div id="gen-ai">
-	<label>Gen-AI tolerance: <span class="slider-wrapper"><input id="gen-ai-input" type="range" min="1" max="100" value="{$user['genAiTolerance'] === 0 ? 100 : $user['genAiTolerance']}" autocomplete="off"></span><br><span id="gen-ai-label">Mods using Gen-AI will not be hidden.</span></label>
+	<label>Low effort / Gen-AI tolerance: <span class="slider-wrapper"><input id="gen-ai-input" type="range" min="1" max="100" value="{$user['genAiTolerance'] === 0 ? 100 : $user['genAiTolerance']}" autocomplete="off"></span><br><span id="gen-ai-label">Mods reported as low effort will not be hidden.</span></label>
 </div>
 
 <h3>Notification Settings</h3>
@@ -96,7 +96,10 @@ const genaiInputEl = document.getElementById('gen-ai-input');
 const genaiLabelEl = document.getElementById('gen-ai-label');
 function updateGenAiLabel(value)
 \{
-	genaiLabelEl.textContent = 'Mods using Gen-AI will '+(value == 100 ? 'not be hidden.' : `be hidden after they have been reported as low-effort by at least ${value} user${value == 1 ? '' : 's'}.`);
+
+	genaiLabelEl.textContent = (value == 100) 
+		? 'Mods reported as low effort will not be hidden.' 
+		: `Mods with at least ${value} 'low effort' report${value == 1 ? '' : 's'} will be hidden from you.`;
 }
 updateGenAiLabel(genaiInputEl.value);
 genaiInputEl.addEventListener('input', e => updateGenAiLabel(e.target.value));

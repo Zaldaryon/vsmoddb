@@ -96,9 +96,6 @@
 					<a class="button large shine strikethrough-when-banned strikethrough-when-readonly" href="/edit/mod/?assetid={$asset['assetId']}">Edit</a>&nbsp;
 					<a class="button large shine strikethrough-when-banned strikethrough-when-readonly" href="/edit/release/?modid={$asset['modId']}">Add release</a>&nbsp;
 				{/if}
-				{if isset($user)}
-				<a id="report-mod-btn" class="button large shine strikethrough-when-banned strikethrough-when-readonly">Report</a>
-				{/if}
 			</div>
 
 			{if !empty($files) || !empty($trailerEmbedUrl)}
@@ -171,13 +168,17 @@
 				<dt>Created:</dt><dt>{fancyDate($asset['created'])}</dt>
 				<dt>Last modified:</dt><dt>{fancyDate($asset['lastReleased'])}</dt>
 				<dt>Downloads:</dt><dt>{intval($asset['downloads'])}</dt>
+				{if isset($user)}
 				<dd class="full-width">
-					<a href="{if !empty($user)}#follow{else}/login{/if}" class="interactbox {if $isFollowing}on{else}off{/if}">
+					<a href="{if !empty($user)}#follow{else}/login{/if}" class="interactbox {if $isFollowing}on{else}off{/if} strikethrough-when-readonly" onclick="return false;">
 						<span class="off"><i class="bx bx-star"></i>Follow</span>
 						<span class="on"><i class="bx bxs-star"></i>Unfollow</span>
 						<span class="count">{$asset["follows"]}</span>
 					</a>
+					&nbsp;&nbsp;
+					<a id="report-mod-btn" class="strikethrough-when-banned strikethrough-when-readonly" onclick="return false;"><i class="bx bx-error"></i> <span>Report</span></a>
 				</dd>
+				{/if}
 				<dd class="full-width">
 					{if $recommendedReleaseStable}
 						{if count($recommendedReleaseStable['compatibleGameVersions']) > 0}<strong>

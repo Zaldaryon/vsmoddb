@@ -439,3 +439,15 @@ details.version-selector {
 
 	input, select { width: fit-content; }
 }
+
+
+
+#report-mod-btn {
+	>i {
+		vertical-align: center;
+	}
+	>span {
+		text-decoration: underline;
+		cursor: pointer;
+	}
+}

@@ -9,7 +9,7 @@ function attachReportModHandlers()
 	dialogEl.querySelector('[name="category"]')!.addEventListener('change', (e) => {
 		switch((e.target as HTMLSelectElement).value) {
 			case '9':
-				categoryNoteEl.innerHTML = 'This category will not be immediately investigated by moderators, but is instead used to enable users to hide such mods as per their <a href="/accountsettings#gen-ai" target="_blank">configured tolerance</a>.';
+				categoryNoteEl.innerHTML = 'This category may not be immediately investigated by moderators, but enables users to hide reported mods as per their <a href="/accountsettings#gen-ai" target="_blank">configured tolerance</a>.';
 				break;
 		}
 	});
@@ -45,7 +45,8 @@ function attachReportModHandlers()
 		})
 		.done(() => {
 			const link = jqXHR.getResponseHeader('Location')!;
-			R.addMessage(MSG_CLASS_OK, `Your report has been submitted (<a href="${link}" target="_blank">link</a>).`, false)
+			const num = link.substring(link.lastIndexOf('/') + 1);
+			R.addMessage(MSG_CLASS_OK, `Your report <a href="${link}" target="_blank">#${num}</a> has been submitted.`, false)
 			dialogEl.close();
 			(dialogEl.getElementsByClassName('btn-submit')[0] as HTMLButtonElement).disabled = false;
 		});
