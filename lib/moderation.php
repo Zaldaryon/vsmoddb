@@ -22,7 +22,7 @@ const REPORT_CATEGORIES_MOD = [
 	REPORT_CATEGORY_MOD_EXPLANATION    => "Missing clear explanation of function.",
 	REPORT_CATEGORY_MOD_SPAM           => "Spamming or other bot-like behavior.",
 	REPORT_CATEGORY_MOD_PIRACY         => "Advocation of piracy.",
-	REPORT_CATEGORY_MOD_LOW_EFFORT_AI  => "Veery low effort / AI-generated content.",
+	REPORT_CATEGORY_MOD_LOW_EFFORT_AI  => "Very low effort / AI-generated content.",
 
 	REPORT_CATEGORY_OTHER => "Other.",
 ];
