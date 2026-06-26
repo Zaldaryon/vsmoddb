@@ -7,18 +7,18 @@ if(empty($user)) {
 /** @var array<string> $urlparts */
 
 
-/** Validates that the current user is not banned and `fail`s with a reason if they are. */
+/** Validates that the current user is not banned and `fail`s with an error if they are. */
 function validateUserNotBanned()
 {
 	global $user;
-	if($user['isBanned'])  fail(HTTP_FORBIDDEN, ['reason' => 'You are currently banned.']);
+	if($user['isBanned'])  fail(HTTP_FORBIDDEN, ['error' => 'You are currently banned.']);
 }
 
-/** Validates the action token within the request and `fail`s with a reason it is not. */
+/** Validates the action token within the request and `fail`s with a error it is not. */
 function validateActionTokenAPI()
 {
 	global $user;
-	if(!isset($_REQUEST['at']) || $user['actionToken'] != $_REQUEST['at'])  fail(HTTP_FORBIDDEN, ['reason' => 'Invalid action token. Need to log in again?']);
+	if(!isset($_REQUEST['at']) || $user['actionToken'] != $_REQUEST['at'])  fail(HTTP_FORBIDDEN, ['error' => 'Invalid action token. Need to log in again?']);
 }
 
 switch($urlparts[0]) {

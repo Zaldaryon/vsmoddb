@@ -28,7 +28,7 @@ function attachReportModHandlers()
 			data.set('reason', reason);
 		}
 
-		if(!reason || reason.length < 100) {
+		if(!reason || reason.length < 50) {
 			R.markAsErrorElement(form.getElementsByClassName('tox-tinymce')[0] as HTMLElement);
 			errContainerEl.textContent = 'Please provide substantial reasoning for your report.';
 			return false;

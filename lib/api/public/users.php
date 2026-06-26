@@ -1,20 +1,20 @@
 <?php
 
 if(empty($urlparts)) {
-	fail(404);
+	fail(HTTP_NOT_FOUND);
 }
 
 switch($urlparts[0]) {
 	case 'by-name':
-		if(count($urlparts) !== 2)  fail(404);
+		if(count($urlparts) !== 2)  fail(HTTP_NOT_FOUND);
 		validateMethod('GET');
 
 		$limit = filter_input(INPUT_GET, 'limit', FILTER_VALIDATE_INT);
 		if($limit === null) $limit = 10;
-		else if(!$limit || $limit > 200)  fail(400, ['reason' => 'Invalid limit provided.']);
+		else if(!$limit || $limit > 200)  fail(HTTP_BAD_REQUEST, 'Invalid limit provided.');
 
 		$search = urldecode($urlparts[1]);
-		if(strlen($search) === 0)  fail(400, ['reason' => 'Empty search phrase provided.']);
+		if(strlen($search) === 0)  fail(HTTP_BAD_REQUEST, 'Empty search phrase provided.');
 
 		$contributorsOnlyFilter = ($_GET['contributors-only'] ?? false) ? <<<SQL
 			AND (

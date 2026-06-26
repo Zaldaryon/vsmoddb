@@ -387,7 +387,7 @@
 					$(".count", $(this)).text("" + oldCount);
 
 					const d = JSON.parse(jqXHR.responseText);
-					R.addMessage(MSG_CLASS_ERROR, 'Failed to (un-)follow mod' + (d.reason ? (': '+d.reason) : '.'), true)
+					R.addMessage(MSG_CLASS_ERROR, 'Failed to (un-)follow mod' + (d.error ? (': '+d.error) : '.'), true)
 				});
 			});
 

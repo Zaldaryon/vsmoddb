@@ -21,13 +21,13 @@ switch($urlparts[0]) {
 		$gameVersion = 0;
 		if(isset($_GET['gv'])) {
 			$gameVersion = compileSemanticVersion($_GET['gv']);
-			if(!$gameVersion) fail(HTTP_BAD_REQUEST, ['reason' => 'Invalid game version.']);
+			if(!$gameVersion) fail(HTTP_BAD_REQUEST, 'Invalid game version.');
 		}
 
 		$ignoreRetraction = boolval($_GET['ignore-retractions'] ?? false); // TODO(Rennorb) @cleanup: avoid round trip for retractions. just send the links if it can be ignored the first time round. 
 		$hostedMode = boolval($_GET['hosted-mode'] ?? false);
 
-		if(empty($_GET['ids']))  fail(HTTP_BAD_REQUEST, ['reason' => 'Missing ids.']);
+		if(empty($_GET['ids']))  fail(HTTP_BAD_REQUEST, 'Missing ids.');
 		
 		$result = [];
 
@@ -67,7 +67,7 @@ switch($urlparts[0]) {
 		}
 
 		if(!$knownVersionQueryParams && !$unknownVersionQueryParams) {
-			fail(HTTP_BAD_REQUEST, ['reason' => 'All requested ids are malformed.', 'data' => $result]);
+			fail(HTTP_BAD_REQUEST, ['error' => 'All requested ids are malformed.', 'data' => $result]);
 		}
 
 		$VERSION_MASK_PRERELEASE = VERSION_MASK_PRERELEASE;
@@ -251,7 +251,7 @@ switch($urlparts[0]) {
 							WHERE modId = $modId
 						"); // @security $modId is validated to be int, therefore sql inert.
 
-						if(!$modExists)   fail(HTTP_NOT_FOUND, ['reason' => 'Mod not found or not released.']);
+						if(!$modExists)   fail(HTTP_NOT_FOUND, 'Mod not found or not released.');
 
 
 						switch(count($urlparts)) {
@@ -308,7 +308,7 @@ switch($urlparts[0]) {
 									$queryWhere = 'r.releaseId = '.$releaseId; // @security: $releaseId filtered to be int, therefore sql inert.
 								}
 								else {
-									fail(HTTP_BAD_REQUEST, ['reason' => 'Malformed releaseId.']);
+									fail(HTTP_BAD_REQUEST, 'Malformed releaseId.');
 								}
 
 								$release = $con->getRow(<<<SQL
@@ -328,7 +328,7 @@ switch($urlparts[0]) {
 									LIMIT 1
 								SQL, $queryParams);
 
-								if(!$release) fail(HTTP_NOT_FOUND, ['reason' => 'Release not found.']);
+								if(!$release) fail(HTTP_NOT_FOUND, 'Release not found.');
 
 								$response = [
 									'releaseId'  => intval($release['releaseId']),

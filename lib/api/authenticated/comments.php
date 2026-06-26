@@ -9,7 +9,7 @@ if(empty($urlparts)) {
 }
 
 $commentId = filter_var($urlparts[0], FILTER_VALIDATE_INT);
-if($commentId === false) fail(HTTP_BAD_REQUEST, ['reason' => 'Malformed query param.']);
+if($commentId === false) fail(HTTP_BAD_REQUEST, 'Malformed query param.');
 
 switch($urlparts[1] ?? null) {
 	case 'report':
@@ -24,16 +24,16 @@ switch($urlparts[1] ?? null) {
 		require $config['basepath'] . 'lib/moderation.php';
 
 		$category = filter_input(INPUT_POST, 'category', FILTER_VALIDATE_INT, [ 'options' => [ 'min' => 0, 'max' => 3 ]]); // :MaxReportCategoryComment
-		if($category === null)  fail(HTTP_BAD_REQUEST, ['error' => 'Missing category.']);
-		if($category === false)  fail(HTTP_BAD_REQUEST, ['error' => 'Malformed category.']);
+		if($category === null)  fail(HTTP_BAD_REQUEST, 'Missing category.');
+		if($category === false)  fail(HTTP_BAD_REQUEST, 'Malformed category.');
 
 		$requestHtml = $_POST['reason'] ?? '';
 		$requestHtml = trimHtml(sanitizeHtml($requestHtml));
-		if(!$requestHtml) fail(HTTP_BAD_REQUEST, ['error' => 'Reason must not be empty.']);
+		if(!$requestHtml) fail(HTTP_BAD_REQUEST, 'Reason must not be empty.');
 
 		$requestSearchable = textContent($requestHtml);
-		if(!$requestSearchable) fail(HTTP_BAD_REQUEST, ['error' => 'Reason must not be empty.']);
-		if(strlen($requestSearchable) < 100) fail(HTTP_BAD_REQUEST, ['error' => 'Reason not substantial.']);
+		if(!$requestSearchable) fail(HTTP_BAD_REQUEST, 'Reason must not be empty.');
+		if(strlen($requestSearchable) < 100) fail(HTTP_BAD_REQUEST, 'Reason not substantial.');
 
 
 
@@ -44,18 +44,15 @@ switch($urlparts[1] ?? null) {
 		); // @security: $modId, $category and $user['userId'] are all validated to be int, therefore sql inert.
 
 		if($previousRequest) {
-			fail(HTTP_TOO_MANY_REQUESTS, [
-				'reason' => $previousRequest['resolved']
-					? "You have already reported this comment for the same reason some time ago, which has been resolved <a href='/t/{$previousRequest['requestId']}' target='_blank'>here</a>."
-					: "You have already reported this comment for the same reason some time ago, which can be viewed <a href='/t/{$previousRequest['requestId']}' target='_blank'>here</a>.",
-			]);
+			fail(HTTP_TOO_MANY_REQUESTS, $previousRequest['resolved']
+				? "You have already reported this comment for the same reason some time ago, which has been resolved <a href='/t/{$previousRequest['requestId']}' target='_blank'>here</a>."
+				: "You have already reported this comment for the same reason some time ago, which can be viewed <a href='/t/{$previousRequest['requestId']}' target='_blank'>here</a>."
+			);
 		}
 
 		$requestsInLast7Days = $con->getOne('SELECT COUNT(*) FROM moderationRequests WHERE kind = '.MOD_REQUEST_KIND_REPORT_COMMENT." AND initiatorUserId = {$user['userId']} AND created >= DATE_SUB(NOW(), INTERVAL 7 DAY)");
 		if($requestsInLast7Days > COMMENT_REPORT_LIMIT_PER_WEEK) {
-			fail(HTTP_TOO_MANY_REQUESTS, [
-				'reason' => "You have reached your alloted quota for reporting comments this week. Your reports can be found <a href='/t/u/self' target='_blank'>here</a>.",
-			]);
+			fail(HTTP_TOO_MANY_REQUESTS, "You have reached your alloted quota for reporting comments this week. Your reports can be found <a href='/t/u/self' target='_blank'>here</a>.");
 		}
 
 		$con->startTrans();
@@ -70,7 +67,7 @@ switch($urlparts[1] ?? null) {
 		logAuditEvent(AUDIT_LOG_KIND_REPORT_CREATE, $requestId);
 
 		$ok = $con->completeTrans();
-		if(!$ok) fail(HTTP_INTERNAL_ERROR, ['error' => 'Internal database error.']);
+		if(!$ok) fail(HTTP_INTERNAL_ERROR, 'Internal database error.');
 
 		header('Location: /t/'.$requestId, true, HTTP_CREATED);
 		exit();
@@ -83,20 +80,20 @@ switch($urlparts[1] ?? null) {
 				validateContentType('text/html');
 		
 				$comment = $con->getRow('SELECT assetId, userId, text FROM comments WHERE commentId = ? AND !deleted', [$commentId]);
-				if(!$comment)  fail(HTTP_NOT_FOUND, ['reason' => 'Unknown commentid.']);
+				if(!$comment)  fail(HTTP_NOT_FOUND, 'Unknown commentid.');
 		
 				$wasModAction = $user['userId'] != $comment['userId'];
 				if($wasModAction && !canModerate(null, $user))  fail(HTTP_FORBIDDEN);
 		
 				$commentHtml = trimHtml(sanitizeHtml(file_get_contents('php://input')));
-				if(!$commentHtml)  fail(HTTP_BAD_REQUEST, ['reason' => 'Comment must not be empty.']);
+				if(!$commentHtml)  fail(HTTP_BAD_REQUEST, 'Comment must not be empty.');
 		
 				$textLen = strlen($commentHtml);
 				if($textLen > 65535) { // TEXT column max length in comments.text
 					$sizeKb = floor($textLen / 1024);
 					$reason = "Excessive size ({$sizeKb}KB).";
 					if(str_contains($commentHtml, 'src="data:image')) $reason .= " You cannot paste large images directly. If you need a large image, upload it to an external site and link to that.";
-					fail(HTTP_BAD_REQUEST, ['reason' => $reason]);
+					fail(HTTP_BAD_REQUEST, $reason);
 				}
 		
 				$commentTextShort = mb_substr(textContent($commentHtml), 0, 255); // stored for comment replies
@@ -131,7 +128,7 @@ switch($urlparts[1] ?? null) {
 					JOIN assets a ON a.assetId = c.assetId
 					WHERE c.commentId = ? AND !c.deleted
 				SQL, [$commentId]);
-				if(!$comment)  fail(HTTP_NOT_FOUND, ['reason' => 'Unknown commentid.']);
+				if(!$comment)  fail(HTTP_NOT_FOUND, 'Unknown commentid.');
 		
 				$wasModAction = $user['userId'] != $comment['userId'];
 				//NOTE(Rennorb): Mod authors can also "moderate" their comments by deleting them.
@@ -167,6 +164,6 @@ switch($urlparts[1] ?? null) {
 		
 			default:
 				header('Allow: POST, DELETE');
-				fail(HTTP_WRONG_METHOD, ['reason' => 'invalid method.']);
+				fail(HTTP_WRONG_METHOD, 'invalid method.');
 		}
 }

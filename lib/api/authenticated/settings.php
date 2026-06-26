@@ -8,7 +8,7 @@ switch($urlparts[0]) {
 		validateMethod('POST');
 
 		$tolerance = filter_input(INPUT_POST, 'tolerance', FILTER_VALIDATE_INT, [ 'options' => [ 'min' => 0, 'max' => 99 ] ]);
-		if($tolerance === false)   fail(400, ['reason' => 'Malformed tolerance param.']);
+		if($tolerance === false)   fail(HTTP_BAD_REQUEST, 'Malformed tolerance param.');
 
 		//NOTE(Rennorb): 0 means "don't care".
 
@@ -20,15 +20,15 @@ switch($urlparts[0]) {
 		switch($urlparts[1]) {
 			case 'followed-mods':
 					validateMethod('POST');
-					if(count($urlparts) < 3)   fail(400, ['reason' => 'Missing id.']);
+					if(count($urlparts) < 3)   fail(HTTP_BAD_REQUEST, 'Missing id.');
 
 					$modId = filter_var($urlparts[2], FILTER_VALIDATE_INT);
-					if($modId === false)   fail(400, ['reason' => 'Malformed id query param.']);
+					if($modId === false)   fail(HTTP_BAD_REQUEST, 'Malformed id query param.');
 
 					if(count($urlparts) === 3) {
 						$newFlags = filter_input(INPUT_POST, 'new', FILTER_VALIDATE_INT);
-						if($newFlags === null)   fail(400, ['reason' => 'Missing new settings value.']);
-						if($newFlags === false)   fail(400, ['reason' => 'Malformed new settings value.']);
+						if($newFlags === null)   fail(HTTP_BAD_REQUEST, 'Missing new settings value.');
+						if($newFlags === false)   fail(HTTP_BAD_REQUEST, 'Malformed new settings value.');
 
 						$con->execute(<<<SQL
 							INSERT INTO userFollowedMods

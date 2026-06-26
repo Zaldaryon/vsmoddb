@@ -27,7 +27,7 @@ switch(count($urlparts)) {
 				$allVersions[] = $newVersion;
 				$allVersions = array_unique($allVersions);
 
-				if($prevCount === count($allVersions)) fail(HTTP_CONFLICT, ['reason' => 'This version already exists']);
+				if($prevCount === count($allVersions)) fail(HTTP_CONFLICT, 'This version already exists');
 
 				sort($allVersions); // sort ascending so the keys are in the correct order :VersionSortIndex
 

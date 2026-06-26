@@ -5,7 +5,7 @@
 if(count($urlparts) < 2)   fail(HTTP_BAD_REQUEST);
 
 $modId = filter_var($urlparts[0], FILTER_VALIDATE_INT);
-if($modId === false) fail(HTTP_BAD_REQUEST, ['reason' => 'Malformed query param modid.']);
+if($modId === false) fail(HTTP_BAD_REQUEST, 'Malformed query param modid.');
 
 switch($urlparts[1]) {
 	case 'comments':
@@ -28,26 +28,26 @@ switch($urlparts[1]) {
 					WHERE m.modId = ?
 				SQL, [$modId]);
 				$assetId = intval($modData['assetId']);
-				if(!$assetId)  fail(HTTP_NOT_FOUND, ['reason' => 'Unknown modid.']);
+				if(!$assetId)  fail(HTTP_NOT_FOUND, 'Unknown modid.');
 
 				$responseTo = filter_input(INPUT_GET, 'response-to', FILTER_VALIDATE_INT);
 				if($responseTo) {
 					$responseTarget = $con->getRow('SELECT COALESCE(conversationRoot, commentId) AS conversationRoot, responseDepth, userId FROM comments WHERE commentId = ?', [$responseTo]);
-					if(!$responseTarget)  fail(HTTP_NOT_FOUND, ['reason' => 'Unknown response-to id.']);
+					if(!$responseTarget)  fail(HTTP_NOT_FOUND, 'Unknown response-to id.');
 				}
 				else {
 					$responseTarget = ['conversationRoot' => null, 'responseDepth' => -1, 'userId' => 0];
 				}
 
 				$commentHtml = trimHtml(sanitizeHtml(file_get_contents('php://input')));
-				if(!$commentHtml)  fail(HTTP_BAD_REQUEST, ['reason' => 'Comment must not be empty.']);
+				if(!$commentHtml)  fail(HTTP_BAD_REQUEST, 'Comment must not be empty.');
 
 				$textLen = strlen($commentHtml);
 				if($textLen > 65535) { // TEXT column max length in comments.text
 					$sizeKb = floor($textLen / 1024);
 					$reason = "Excessive size ({$sizeKb}KB).";
 					if(str_contains($commentHtml, 'src="data:image')) $reason .= " You cannot paste large images directly. If you need a large image, upload it to an external site and link to that.";
-					fail(HTTP_BAD_REQUEST, ['reason' => $reason]);
+					fail(HTTP_BAD_REQUEST, $reason);
 				}
 
 				$commentTextShort = mb_substr(textContent($commentHtml), 0, 255); // stored for comment replies
@@ -83,7 +83,7 @@ switch($urlparts[1]) {
 				logAuditEvent(AUDIT_LOG_KIND_COMMENT_CREATE, $commentId);
 
 				$ok = $con->completeTrans();
-				if(!$ok)  fail(HTTP_INTERNAL_ERROR, ['reason' => 'Database error.']);
+				if(!$ok)  fail(HTTP_INTERNAL_ERROR, 'Database error.');
 
 				// Send notification about the new comment to the main mod author:
 				//TODO(Rennorb): Send notifications to all opt-in contributors, requires adding config option and table changes.
@@ -116,7 +116,7 @@ switch($urlparts[1]) {
 
 		$reason = $_POST['reason'] ?? '';
 		$reason = trimHtml(sanitizeHtml($reason));
-		if(!$reason) fail(HTTP_BAD_REQUEST, ['error' => 'Reason must not be empty.']);
+		if(!$reason) fail(HTTP_BAD_REQUEST, 'Reason must not be empty.');
 
 		$modData = $con->getRow(<<<SQL
 			SELECT m.assetId, a.createdByUserId
@@ -141,7 +141,7 @@ switch($urlparts[1]) {
 
 		$ok = $con->completeTrans();
 		if($ok) good();
-		else fail(HTTP_INTERNAL_ERROR, ['error' => 'Internal database error.']);
+		else fail(HTTP_INTERNAL_ERROR, 'Internal database error.');
 
 	case 'report':
 		validateMethod('PUT');
@@ -155,16 +155,16 @@ switch($urlparts[1]) {
 		require $config['basepath'] . 'lib/moderation.php';
 
 		$category = filter_input(INPUT_POST, 'category', FILTER_VALIDATE_INT, [ 'options' => [ 'min' => 0, 'max' => 9 ]]); // :MaxReportCategoryMod
-		if($category === null)  fail(HTTP_BAD_REQUEST, ['error' => 'Missing category.']);
-		if($category === false)  fail(HTTP_BAD_REQUEST, ['error' => 'Malformed category.']);
+		if($category === null)  fail(HTTP_BAD_REQUEST, 'Missing category.');
+		if($category === false)  fail(HTTP_BAD_REQUEST, 'Malformed category.');
 
 		$requestHtml = $_POST['reason'] ?? '';
 		$requestHtml = trimHtml(sanitizeHtml($requestHtml));
-		if(!$requestHtml) fail(HTTP_BAD_REQUEST, ['error' => 'Reason must not be empty.']);
+		if(!$requestHtml) fail(HTTP_BAD_REQUEST, 'Reason must not be empty.');
 
 		$requestSearchable = textContent($requestHtml);
-		if(!$requestSearchable) fail(HTTP_BAD_REQUEST, ['error' => 'Reason must not be empty.']);
-		if(strlen($requestSearchable) < 100) fail(HTTP_BAD_REQUEST, ['error' => 'Reason not substantial.']);
+		if(!$requestSearchable) fail(HTTP_BAD_REQUEST, 'Reason must not be empty.');
+		if(strlen($requestSearchable) < 100) fail(HTTP_BAD_REQUEST, 'Reason not substantial.');
 
 
 
@@ -201,7 +201,7 @@ switch($urlparts[1]) {
 		logAuditEvent(AUDIT_LOG_KIND_REPORT_CREATE, $requestId);
 
 		$ok = $con->completeTrans();
-		if(!$ok) fail(HTTP_INTERNAL_ERROR, ['error' => 'Internal database error.']);
+		if(!$ok) fail(HTTP_INTERNAL_ERROR, 'Internal database error.');
 
 		header('Location: /t/'.$requestId, true, HTTP_CREATED);
 		exit();
@@ -234,8 +234,8 @@ switch($urlparts[1]) {
 						if(empty($_POST['limit'])) $newLimit = null;
 						else {
 							$newLimit = intval($_POST['limit']);
-							if($newLimit != $_POST['limit']) fail(HTTP_BAD_REQUEST, ['reason' => 'Malformed limit.']);
-							if($newLimit > parseMaxUploadSizeFromIni()) fail(HTTP_BAD_REQUEST, ['reason' => 'The new limit is above the current server limit.']);
+							if($newLimit != $_POST['limit']) fail(HTTP_BAD_REQUEST, 'Malformed limit.');
+							if($newLimit > parseMaxUploadSizeFromIni()) fail(HTTP_BAD_REQUEST, 'The new limit is above the current server limit.');
 						}
 
 						$con->startTrans();
@@ -251,7 +251,7 @@ switch($urlparts[1]) {
 
 						$ok = $con->completeTrans();
 						if($ok) good();
-						else fail(HTTP_INTERNAL_ERROR, ['error' => 'Internal database error.']);
+						else fail(HTTP_INTERNAL_ERROR, 'Internal database error.');
 
 					default:
 						header('Allow: GET, PUT');
@@ -260,7 +260,7 @@ switch($urlparts[1]) {
 
 			default: // actions targeting a specific release
 				$releaseId = filter_var($urlparts[2], FILTER_VALIDATE_INT);
-				if($releaseId === false)  fail(HTTP_BAD_REQUEST, ['reason' => 'Malformed query param.']);
+				if($releaseId === false)  fail(HTTP_BAD_REQUEST, 'Malformed query param.');
 
 				if(count($urlparts) !== 4)   fail(HTTP_BAD_REQUEST);
 
@@ -285,16 +285,16 @@ switch($urlparts[1]) {
 						if(!$prevData)   fail(HTTP_NOT_FOUND);
 
 						$prevData['assetTypeId'] = ASSETTYPE_RELEASE;
-						if(!canEditAsset($prevData, $user))   fail(HTTP_FORBIDDEN, ['reason' => 'You may not edit this release.']);
+						if(!canEditAsset($prevData, $user))   fail(HTTP_FORBIDDEN, 'You may not edit this release.');
 
-						if($modId !== $prevData['modId'])   fail(HTTP_BAD_REQUEST, ['reason' => 'Release does not belong to mod.']);
+						if($modId !== $prevData['modId'])   fail(HTTP_BAD_REQUEST, 'Release does not belong to mod.');
 
 						// Moderators can overwrite retraction reasons.
-						if($prevData['retractedByModerator'] && !canModerate(null, $user))   fail(HTTP_BAD_REQUEST, ['reason' => 'This release is already retracted.']);
+						if($prevData['retractedByModerator'] && !canModerate(null, $user))   fail(HTTP_BAD_REQUEST, 'This release is already retracted.');
 
 						$reasonHtml = trimHtml(sanitizeHtml($_POST['reason']));
 
-						if(empty(textContent($reasonHtml))) fail(HTTP_BAD_REQUEST, ['reason' => 'Missing reason.']);
+						if(empty(textContent($reasonHtml))) fail(HTTP_BAD_REQUEST, 'Missing reason.');
 
 						include($config['basepath'] . 'lib/edit-release.php');
 
@@ -345,12 +345,12 @@ switch($urlparts[1]) {
 
 						$ok = $con->completeTrans();
 						if($ok) good();
-						else fail(HTTP_INTERNAL_ERROR, ['error' => 'Internal database error.']);
+						else fail(HTTP_INTERNAL_ERROR, 'Internal database error.');
 				}
 		}
 
 	case 'tags':
-		if(DISABLE_USER_TAGS) fail(HTTP_SERVICE_UNAVAILABLE, ['reason' => 'User tags are currently disabled.']);
+		if(DISABLE_USER_TAGS) fail(HTTP_SERVICE_UNAVAILABLE, 'User tags are currently disabled.');
 
 		if(count($urlparts) === 2) {
 			validateMethod('POST');
@@ -358,10 +358,10 @@ switch($urlparts[1]) {
 			validateActionTokenAPI();
 
 			$tags = filter_input(INPUT_POST, 'tags', FILTER_UNSAFE_RAW, FILTER_FORCE_ARRAY);
-			if($tags === null) fail(HTTP_BAD_REQUEST, ['reason' => 'Missing post param tags.']);
+			if($tags === null) fail(HTTP_BAD_REQUEST, 'Missing post param tags.');
 
 			$tags = array_filter(array_map('trim', $tags));
-			if(empty($tags)) fail(HTTP_BAD_REQUEST, ['reason' => 'Malformed post param tags.']);
+			if(empty($tags)) fail(HTTP_BAD_REQUEST, 'Malformed post param tags.');
 
 			$response = [];
 
@@ -420,7 +420,7 @@ switch($urlparts[1]) {
 
 			$ok = $con->completeTrans();
 			if($ok) good($response, JSON_FORCE_OBJECT);
-			else fail(HTTP_INTERNAL_ERROR, ['error' => 'Internal database error.']);
+			else fail(HTTP_INTERNAL_ERROR, 'Internal database error.');
 		}
 		if(count($urlparts) === 4 && $urlparts[3] === 'vote') { // {modid}/tags/{tagid}/vote
 			validateMethod('PUT');
@@ -432,11 +432,11 @@ switch($urlparts[1]) {
 			validateActionTokenAPI();
 
 			$tagId = filter_var($urlparts[2], FILTER_VALIDATE_INT);
-			if($tagId === false) fail(HTTP_BAD_REQUEST, ['reason' => 'Malformed query param tagid.']);
+			if($tagId === false) fail(HTTP_BAD_REQUEST, 'Malformed query param tagid.');
 
 			$vote = filter_input(INPUT_POST, 'vote', FILTER_VALIDATE_INT);
-			if($vote === null) fail(HTTP_BAD_REQUEST, ['reason' => 'Missing post param vote.']);
-			if($vote === false || $vote < -1 || $vote > 1) fail(HTTP_BAD_REQUEST, ['reason' => 'Malformed post param vote.']);
+			if($vote === null) fail(HTTP_BAD_REQUEST, 'Missing post param vote.');
+			if($vote === false || $vote < -1 || $vote > 1) fail(HTTP_BAD_REQUEST, 'Malformed post param vote.');
 
 			$con->startTrans();
 
@@ -468,6 +468,6 @@ switch($urlparts[1]) {
 
 			$ok = $con->completeTrans();
 			if($ok) good();
-			else fail(HTTP_INTERNAL_ERROR, ['error' => 'Internal database error.']);
+			else fail(HTTP_INTERNAL_ERROR, 'Internal database error.');
 		}
 }

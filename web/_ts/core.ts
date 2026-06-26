@@ -58,9 +58,9 @@ attachDefaultFailHandler : function(jqXHR : jqXHR, errorPrefix : string = 'Reque
 		try{ d = JSON.parse(jqXHR.responseText); }
 		catch {
 			R.addMessage(MSG_CLASS_ERROR, 'Failed to parse response.', false);
-			d = { reason: jqXHR.responseText };
+			d = { error: jqXHR.responseText };
 		}
-		const message = errorPrefix + (d.reason ? (': '+d.reason) : '.');
+		const message = errorPrefix + (d.error ? (': '+d.error) : '.');
 		if(!errorHandler || !errorHandler(message))
 			R.addMessage(MSG_CLASS_ERROR, message, true);
 	});
