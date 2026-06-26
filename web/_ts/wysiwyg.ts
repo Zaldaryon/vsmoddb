@@ -3,7 +3,7 @@ var tinymceSettings = {
 	// Better practice either way, became it makes updating TinyMCE a lot easer.
 	plugins: 'paste print preview searchreplace autolink autoresize directionality visualblocks visualchars fullscreen image link media code codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime emoticons advlist lists wordcount imagetools textpattern help spoiler mention noneditable',
 	external_plugins: {
-		'mention': '/web/js/tinymce-custom/plugins/mention/plugin.min.js',
+		'mention': '/web/js/tinymce-custom/plugins/mention/plugin.min.js?v=2',
 	},
 	toolbar: 'formatselect | bold italic strikethrough forecolor backcolor permanentpen formatpainter | link image media pageembed emoticons | alignleft aligncenter alignright alignjustify  | numlist bullist outdent indent | removeformat code | spoiler-add spoiler-remove',
 	toolbar_sticky: true,
@@ -112,7 +112,6 @@ var tinymceSettingsCmt = {
 var tinymceSettingsReport = {
 	menubar: false,
 	plugins: 'paste searchreplace autolink autoresize image link codesample charmap hr pagebreak nonbreaking anchor emoticons advlist lists wordcount imagetools textpattern help spoiler noneditable',
-	external_plugins: tinymceSettings.external_plugins,
 	toolbar: 'bold italic strikethrough | link image emoticons | numlist bullist outdent indent | removeformat | spoiler-add spoiler-remove',
 	toolbar_sticky: true,
 	image_advtab: true,
