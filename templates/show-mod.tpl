@@ -361,10 +361,8 @@
 	<script nonce="{$cspNonce}" type="text/javascript">
 		modId = {$asset['modId']};
 
-		{if !empty($user) && !DISABLE_USER_TAGS}attachTagVoteButtons(document.getElementsByClassName('tags votable')[0], R.get('add-tag-mdl'));{/if}
-
-		$(function() {
-			attachCommentHandlers();
+		{if !empty($user) && !DISABLE_USER_TAGS}
+			{if !DISABLE_USER_TAGS}attachTagVoteButtons(document.getElementsByClassName('tags votable')[0], R.get('add-tag-mdl'));{/if}
 			attachReportModHandlers();
 
 			$("a[href='#follow']").click(function() {
@@ -391,9 +389,11 @@
 					R.addMessage(MSG_CLASS_ERROR, 'Failed to (un-)follow mod' + (d.error ? (': '+d.error) : '.'), true)
 				});
 			});
+		{/if}
 
-			initGallery();
-		});
+		attachCommentHandlers();
+
+		initGallery();
 	</script>
 {/capture}
 

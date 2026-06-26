@@ -319,73 +319,77 @@ function attachCommentHandlers() {
 		}
 	}
 
-	const reportDialogEl = R.get('report-cmt-mdl') as HTMLDialogElement;
-	const reportErrContainerEl = reportDialogEl.getElementsByClassName('err-container')[0];
+	const reportDialogEl = R.get<HTMLDialogElement>('report-cmt-mdl');
+	if(reportDialogEl) {
+		const reportErrContainerEl = reportDialogEl.getElementsByClassName('err-container')[0];
 
-	attachDialogSendHandler(reportDialogEl, (form, data) => {
-		reportErrContainerEl.innerHTML = '&nbsp;';
+		attachDialogSendHandler(reportDialogEl, (form, data) => {
+			reportErrContainerEl.innerHTML = '&nbsp;';
 
-		if(!data.get('category')) {
-			R.markAsErrorElement(form.querySelector('[name="category"]')!);
-			return false;
-		}
+			if(!data.get('category')) {
+				R.markAsErrorElement(form.querySelector('[name="category"]')!);
+				return false;
+			}
 
-		const reason = data.get('reason') as string | null;
-		if(reason) {
-			reason.trim();
-			data.set('reason', reason);
-		}
+			const reason = data.get('reason') as string | null;
+			if(reason) {
+				reason.trim();
+				data.set('reason', reason);
+			}
 
-		if(!reason || reason.length < 50) {
-			R.markAsErrorElement(form.getElementsByClassName('tox-tinymce')[0] as HTMLElement);
-			reportErrContainerEl.textContent = 'Please provide substantial reasoning for your report.';
-			return false;
-		}
+			if(!reason || reason.length < 50) {
+				R.markAsErrorElement(form.getElementsByClassName('tox-tinymce')[0] as HTMLElement);
+				reportErrContainerEl.textContent = 'Please provide substantial reasoning for your report.';
+				return false;
+			}
 
-		return true;
-	}, (jqXHR) => {
-		const submitButton = reportDialogEl.getElementsByClassName('btn-submit')[0] as HTMLButtonElement;
-		startSubmissionSpinner(submitButton);
-
-		R.attachDefaultFailHandler(jqXHR, "Failed to report comment", (err) => {
-			stopSubmissionSpinner(submitButton, "Report");
-			if(jqXHR.status == 429) // Too many requests. Special case where we don't escape.
-				reportErrContainerEl.innerHTML = err;
-			else
-				reportErrContainerEl.textContent = err;
 			return true;
-		})
-		.done(() => {
-			const link = jqXHR.getResponseHeader('Location')!;
-			R.addMessage(MSG_CLASS_OK, `Your report has been submitted (<a href="${link}" target="_blank">link</a>).`, false)
-			reportDialogEl.close();
-			stopSubmissionSpinner(submitButton, "Report");
-			submitButton.disabled = false;
+		}, (jqXHR) => {
+			const submitButton = reportDialogEl.getElementsByClassName('btn-submit')[0] as HTMLButtonElement;
+			startSubmissionSpinner(submitButton);
+
+			R.attachDefaultFailHandler(jqXHR, "Failed to report comment", (err) => {
+				stopSubmissionSpinner(submitButton, "Report");
+				if(jqXHR.status == 429) // Too many requests. Special case where we don't escape.
+					reportErrContainerEl.innerHTML = err;
+				else
+					reportErrContainerEl.textContent = err;
+				return true;
+			})
+			.done(() => {
+				const link = jqXHR.getResponseHeader('Location')!;
+				R.addMessage(MSG_CLASS_OK, `Your report has been submitted (<a href="${link}" target="_blank">link</a>).`, false)
+				reportDialogEl.close();
+				stopSubmissionSpinner(submitButton, "Report");
+				submitButton.disabled = false;
+			});
 		});
-	});
 
-	function clickReport(e : MouseEvent)
-	{
-		e.preventDefault();
+		function clickReport(e : MouseEvent)
+		{
+			e.preventDefault();
 
-		const commentId = $(this).parents(".comment")[0].id.split('-')[1];
-		reportDialogEl.getElementsByTagName('form')[0].action = `/api/v2/comments/${commentId}/report`;
+			const commentId = $(this).parents(".comment")[0].id.split('-')[1];
+			reportDialogEl!.getElementsByTagName('form')[0].action = `/api/v2/comments/${commentId}/report`;
 
-		reportDialogEl.getElementsByTagName('select')[0].value = '';
+			reportDialogEl!.getElementsByTagName('select')[0].value = '';
 
-		const ta = reportDialogEl.getElementsByTagName('textarea')[0];
-		if(ta.style.display !== 'none') createEditor(ta, tinymceSettingsReport);
-		else clearEditorContent(ta);
+			const ta = reportDialogEl!.getElementsByTagName('textarea')[0];
+			if(ta.style.display !== 'none') createEditor(ta, tinymceSettingsReport);
+			else clearEditorContent(ta);
 
-		reportErrContainerEl.innerHTML = '&nbsp;';
+			reportErrContainerEl.innerHTML = '&nbsp;';
 
-		reportDialogEl.showModal();
+			reportDialogEl!.showModal();
+		}
+
+		$(container).on("click", 'a[href="#p"]', clickReport);
 	}
+
 
 	$(container).on("click", 'a[href="#r"]', clickRespond);
 	$(container).on("click", 'a[href="#e"]', clickEdit);
 	$(container).on("click", 'a[href="#h"]', clickHide);
-	$(container).on("click", 'a[href="#p"]', clickReport);
 	$(container).on("click", 'a[href^="#cmt-"]', highlightClickedEl);
 
 	//
