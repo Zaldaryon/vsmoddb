@@ -361,7 +361,7 @@
 	<script nonce="{$cspNonce}" type="text/javascript">
 		modId = {$asset['modId']};
 
-		{if !empty($user) && !DISABLE_USER_TAGS}
+		{if !empty($user)}
 			{if !DISABLE_USER_TAGS}attachTagVoteButtons(document.getElementsByClassName('tags votable')[0], R.get('add-tag-mdl'));{/if}
 			attachReportModHandlers();
 
