@@ -108,9 +108,6 @@
 						{foreach from=$files item=file}
 						<div><img src="{$file['url']}" loading="lazy"></div>
 						{/foreach}
-						{if empty($files) && empty($trailerEmbedUrl) && !empty($asset['logoUrl'])}
-						<div><img src="{$asset['logoUrl']}" loading="lazy"></div>
-						{/if}
 					</div>
 					{if count($files) + (!empty($trailerEmbedUrl) ? 1 : 0) >= 2}
 					<button class="ctrl arr prev" title="Previous"></button>
@@ -130,7 +127,6 @@
 							?><button data-i="<?= $i ?>"><img src="<?= $file['url'] ?>" loading="lazy"></button><?
 							$i++;
 						}
-						//NOTE(Rennorb): No need for the thumbnail only case, in that case there is only one image and therefore no nav.
 						?>
 						<div class="indicator"></div>
 					?></div>

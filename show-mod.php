@@ -12,7 +12,7 @@ $asset = $con->getRow("
 	SELECT
 		a.*,
 		m.*,
-		logo.cdnPath AS logoUrl,
+		logo.cdnPath AS logoUrl, ST_X(ld.size) AS logoWidth, ST_Y(ld.size) AS logoHeight,
 		logo.created < '".SQL_MOD_CARD_TRANSITION_DATE."' AS hasLegacyLogo,
 		HEX(creator.hash) AS creatorHash,
 		creator.name AS creatorName,
@@ -23,6 +23,7 @@ $asset = $con->getRow("
 		LEFT JOIN users creator ON creator.userId = a.createdByUserId
 		LEFT JOIN status s ON s.statusId = a.statusId
 		LEFT JOIN files AS logo ON logo.fileId = m.embedLogoFileId
+		LEFT JOIN fileImageData ld ON ld.fileId = logo.fileId
 	WHERE
 		a.assetId = ?
 ", [$assetId]);
@@ -59,7 +60,13 @@ $teamMembers = $con->getAll(<<<SQL
 SQL, [$asset['modId']]);
 $view->assign('teamMembers', $teamMembers);
 
-$files = $con->getAll('SELECT f.*, ST_X(d.size) AS width, ST_Y(d.size) AS height FROM files f LEFT JOIN fileImageData d ON d.fileId = f.fileId WHERE f.assetId = ? AND f.fileId NOT IN (?, ?) ORDER BY f.`order`', 
+$files = $con->getAll(<<<SQL
+	SELECT f.*, ST_X(d.size) AS width, ST_Y(d.size) AS height
+	FROM files f
+	LEFT JOIN fileImageData d ON d.fileId = f.fileId
+	WHERE f.assetId = ? AND f.fileId NOT IN (?, ?)
+	ORDER BY f.`order`
+SQL, 
 	[$assetId, $asset['cardLogoFileId'] ?? 0, $asset['embedLogoFileId'] ?? 0]);  /* sql cant compare against null */
 
 //NOTE(Rennorb): There was a time where we rescaled images for logos. We no longer do that, but in ~140 cases there are still two images for the logo: the actual logo image, and the original one that was uploaded.
@@ -89,12 +96,19 @@ if(!empty($asset['logoUrl'])) {
 	$asset['logoUrl'] = formatCdnUrlFromCdnPath($asset['logoUrl']);
 }
 
-foreach ($files as &$file) {
-	$file['created'] = date('M jS Y, H:i:s', strtotime($file['created']));
-	$file['ext'] = substr($file['name'], strrpos($file['name'], '.')+1); // no clue why pathinfo doesnt work here
+foreach($files as &$file) {
 	$file['url'] = formatCdnUrl($file);
 }
 unset($file);
+
+// If there is no other image at least show the thumbnail:
+if(empty($files) && !empty($asset['logoUrl'])) {
+	$files[] = [
+		'url'    => $asset['logoUrl'],
+		'width'  => $asset['logoWidth'],
+		'height' => $asset['logoHeight'],
+	];
+}
 
 // Compute gallery stage dimensions: shrink-wrap to largest image within 800x450 bounds.
 $galleryWidth = 0;
@@ -129,12 +143,6 @@ if (!empty($asset['trailerVideoUrl'])) {
 }
 $view->assign('trailerEmbedUrl', $trailerEmbedUrl);
 $view->assign('trailerThumbUrl', $trailerThumbUrl);
-
-$thumbOffset = !empty($trailerEmbedUrl) ? 1 : 0;
-foreach ($files as &$file) {
-	$file['thumbIndex'] = $thumbOffset++;
-}
-unset($file);
 
 $view->assign('files', $files);
 
