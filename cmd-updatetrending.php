@@ -49,12 +49,12 @@ $ok = $con->execute(<<<SQL
 	SET m.trendingPoints = ROUND
   (
     (
-        (COALESCE(f1.downloads, 0) * LEAST($intervalHours * 60 / LEAST(TIMESTAMPDIFF(MINUTE, m.created, NOW()), $intervalHours * 60), 10) + $smoothingBias)
-      / (COALESCE(f2.downloads, 0) * GREATEST(0, LEAST($intervalHours * 60 / LEAST(TIMESTAMPDIFF(MINUTE, m.created, NOW()) - $intervalHours * 60, $intervalHours * 60), 10)) + $smoothingBias)
+        (COALESCE(f1.downloads, 0) + $smoothingBias)
+      / (COALESCE(f2.downloads, 0) + $smoothingBias)
     ) + 
     (
-        (COALESCE(c1.comments,  0) * LEAST($intervalHours * 60 / LEAST(TIMESTAMPDIFF(MINUTE, m.created, NOW()), $intervalHours * 60), 10) + $smoothingBias)
-      / (COALESCE(c2.comments, 0) * GREATEST(0, LEAST($intervalHours * 60 / LEAST(TIMESTAMPDIFF(MINUTE, m.created, NOW()) - $intervalHours * 60, $intervalHours * 60), 10)) + $smoothingBias)
+        (COALESCE(c1.comments,  0) + $smoothingBias)
+      / (COALESCE(c2.comments, 0)  + $smoothingBias)
     ) * 5 - 6
   )
 SQL);
