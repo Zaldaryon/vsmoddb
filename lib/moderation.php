@@ -88,7 +88,7 @@ function stringifyModerationRequestKind($request)
 		case MOD_REQUEST_KIND_REPORT_MOD:
 			switch($request['category']) {
 				case REPORT_CATEGORY_MOD_MALICIOUS:      return 'Mod Report - Malicious';
-				case REPORT_CATEGORY_MOD_DISCRIMINATION: return 'Mod Report - Def./Bul./Obs./Dis./Pro.';
+				case REPORT_CATEGORY_MOD_DISCRIMINATION: return 'Mod Report - Defamation / Bullying / Obscenity / Discrimination / Provocations';
 				case REPORT_CATEGORY_MOD_COPYRIGHT:      return 'Mod Report - Copyright';
 				case REPORT_CATEGORY_MOD_LICENSING:      return 'Mod Report - Licensing';
 				case REPORT_CATEGORY_MOD_ENGLISH:        return 'Mod Report - English';
@@ -102,7 +102,7 @@ function stringifyModerationRequestKind($request)
 
 		case MOD_REQUEST_KIND_REPORT_COMMENT:
 			switch($request['category']) {
-				case REPORT_CATEGORY_COMMENT_DISCRIMINATION: return 'Comment Report - Def./Bul./Obs./Dis./Pro.';
+				case REPORT_CATEGORY_COMMENT_DISCRIMINATION: return 'Comment Report - Defamation / Bullying / Obscenity / Discrimination / Provocations';
 				case REPORT_CATEGORY_COMMENT_SPAM:           return 'Comment Report - Spam';
 				case REPORT_CATEGORY_COMMENT_PIRACY:         return 'Comment Report - Piracy';
 				case REPORT_CATEGORY_OTHER:                  return 'Comment Report';
@@ -122,7 +122,7 @@ function stringifyModerationRequestCategory($request)
 		case MOD_REQUEST_KIND_REPORT_MOD:
 			switch($request['category']) {
 				case REPORT_CATEGORY_MOD_MALICIOUS:      return 'Malicious';
-				case REPORT_CATEGORY_MOD_DISCRIMINATION: return 'Def./Bul./Obs./Dis./Pro.';
+				case REPORT_CATEGORY_MOD_DISCRIMINATION: return 'Defamation / Bullying / Obscenity / Discrimination / Provocations';
 				case REPORT_CATEGORY_MOD_COPYRIGHT:      return 'Copyright';
 				case REPORT_CATEGORY_MOD_LICENSING:      return 'Licensing';
 				case REPORT_CATEGORY_MOD_ENGLISH:        return 'English';
@@ -136,7 +136,7 @@ function stringifyModerationRequestCategory($request)
 
 		case MOD_REQUEST_KIND_REPORT_COMMENT:
 			switch($request['category']) {
-				case REPORT_CATEGORY_COMMENT_DISCRIMINATION: return 'Def./Bul./Obs./Dis./Pro.';
+				case REPORT_CATEGORY_COMMENT_DISCRIMINATION: return 'Defamation / Bullying / Obscenity / Discrimination / Provocations';
 				case REPORT_CATEGORY_COMMENT_SPAM:           return 'Spam';
 				case REPORT_CATEGORY_COMMENT_PIRACY:         return 'Piracy';
 				case REPORT_CATEGORY_OTHER:                  return 'Other';
