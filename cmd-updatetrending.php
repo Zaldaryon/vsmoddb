@@ -21,13 +21,13 @@ $ok = $con->execute(<<<SQL
 	LEFT JOIN (
 		SELECT c.assetId, COUNT(*) AS comments
 		FROM comments c
-		WHERE c.created > DATE_SUB(NOW(), INTERVAL $intervalHours HOUR)
+		WHERE c.created > DATE_SUB(NOW(), INTERVAL $intervalHours HOUR) AND !c.deleted
 		GROUP BY c.assetId
 	) c1 ON c1.assetId = m.assetId
 	LEFT JOIN (
 		SELECT c.assetId, COUNT(*) AS comments
 		FROM comments c
-		WHERE c.created BETWEEN DATE_SUB(NOW(), INTERVAL 2 * $intervalHours HOUR) AND DATE_SUB(NOW(), INTERVAL $intervalHours HOUR)
+		WHERE c.created BETWEEN DATE_SUB(NOW(), INTERVAL 2 * $intervalHours HOUR) AND DATE_SUB(NOW(), INTERVAL $intervalHours HOUR) AND !c.deleted
 		GROUP BY c.assetId
 	) c2 ON c2.assetId = m.assetId
 	LEFT JOIN (
