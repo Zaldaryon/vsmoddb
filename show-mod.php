@@ -12,6 +12,7 @@ if (!$assetId) {
 $asset = $con->getRow("
 	SELECT
 		a.assetId,
+		a.assetTypeId,
 		a.createdByUserId,
 		a.name,
 		a.created,
