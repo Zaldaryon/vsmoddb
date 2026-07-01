@@ -69,6 +69,7 @@ _define_default("MOD_SEARCH_VALIDATE_LIMIT_MAX", 20);
 
 _define_default("MOD_REPORT_DEDUPLICATION_TIMESPAN", 7); // days
 _define_default("MOD_REPORT_LIMIT_PER_WEEK", 10); // counts open and dismissed reports, but not accepted ones.
+_define_default("MOD_REPORT_LIMIT_LOW_EFFORT_WEIGHT", .1); // The amount of reports a "low effort ai" report is counted as for the sake of rate limiting.
 
 _define_default("COMMENT_REPORT_DEDUPLICATION_TIMESPAN", 7); // days
 _define_default("COMMENT_REPORT_LIMIT_PER_WEEK", 50); // counts open and dismissed reports, but not accepted ones.

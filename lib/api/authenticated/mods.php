@@ -175,18 +175,16 @@ switch($urlparts[1]) {
 		); // @security: $modId, $category and $user['userId'] are all validated to be int, therefore sql inert.
 
 		if($previousRequest) {
-			fail(HTTP_TOO_MANY_REQUESTS, [
-				'reason' => $previousRequest['resolved']
+			fail(HTTP_TOO_MANY_REQUESTS, 
+				$previousRequest['resolved']
 					? "You have already reported this server for the same reason some time ago, which has been resolved <a href='/t/{$previousRequest['requestId']}' target='_blank'>here</a>."
 					: "You have already reported this server for the same reason some time ago, which can be viewed <a href='/t/{$previousRequest['requestId']}' target='_blank'>here</a>.",
-			]);
+			);
 		}
 
-		$requestsInLast7Days = $con->getOne('SELECT COUNT(*) FROM moderationRequests WHERE kind = '.MOD_REQUEST_KIND_REPORT_MOD." AND initiatorUserId = {$user['userId']} AND created >= DATE_SUB(NOW(), INTERVAL 7 DAY)");
+		$requestsInLast7Days = $con->getOne('SELECT SUM(IF(category = '.REPORT_CATEGORY_MOD_LOW_EFFORT_AI.', '.MOD_REPORT_LIMIT_LOW_EFFORT_WEIGHT.', 1)) FROM moderationRequests WHERE kind = '.MOD_REQUEST_KIND_REPORT_MOD." AND initiatorUserId = {$user['userId']} AND created >= DATE_SUB(NOW(), INTERVAL 7 DAY)");
 		if($requestsInLast7Days > MOD_REPORT_LIMIT_PER_WEEK) {
-			fail(HTTP_TOO_MANY_REQUESTS, [
-				'reason' => "You have reached your alloted quota for reporting mods this week. Your reports can be found <a href='/t/u/self' target='_blank'>here</a>.",
-			]);
+			fail(HTTP_TOO_MANY_REQUESTS, "You have reached your alloted quota for reporting mods this week. Your reports can be found <a href='/t/u/self' target='_blank'>here</a>.");
 		}
 
 		$con->startTrans();
