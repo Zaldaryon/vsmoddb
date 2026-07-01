@@ -16,6 +16,8 @@ if($targetUserHash === 'self' || $targetUserHash === $user['hash']) {
 	$shownUser = $user;
 }
 else {
+	if(!canModerate(null, $user))   showErrorPage(HTTP_UNAUTHORIZED);
+
 	$shownUser = getUserByHash($targetUserHash);
 	if(!$shownUser)   showErrorPage(HTTP_NOT_FOUND);
 }
@@ -24,9 +26,9 @@ else {
 $tickets = $con->getAll(<<<SQL
 	SELECT requestId, kind, category, stateFlags, IF(LENGTH(requestSearchable) > 256, CONCAT(SUBSTR(requestSearchable, 1, 256), '...'), requestSearchable) AS requestSearchable
 	FROM moderationRequests
-	WHERE initiatorUserId = {$user['userId']}
+	WHERE initiatorUserId = {$shownUser['userId']}
 	ORDER BY created DESC
-SQL);
+SQL); // @security: $shownUser['userId'] comes from the database and is int, therefore sql inert.
 
 
 $view->assign('pagetitle', $shownUser['userId'] == $user['userId'] ? "My Moderation Requests - " : "Moderation Requests initiated by {$shownUser['name']} - ");
