@@ -118,11 +118,6 @@ function isNumber($val)
 	return intval($val) . "" == $val;
 }
 
-function isUrl($url)
-{
-	return strlen(filter_var($url, FILTER_VALIDATE_URL));
-}
-
 /**
  *  When filter_input doesn't quite do what you need it to.
  * 
@@ -176,6 +171,7 @@ function forceArrayOfInts($var, $filterInsteadOfFail = false)
 	return $filterInsteadOfFail ? [] : false;
 }
 
+/** Returns the last element without moving the array internal pointer (unlike end()). */
 function last($array)
 {
 	return $array[count($array) - 1];
