@@ -11,8 +11,28 @@ if (!$assetId) {
 
 $asset = $con->getRow("
 	SELECT
-		a.*,
-		m.*,
+		a.assetId,
+		a.createdByUserId,
+		a.name,
+		a.created,
+		a.text,
+		m.modId,
+		m.urlAlias,
+		m.cardLogoFileId,
+		m.embedLogoFileId,
+		m.homepageUrl,
+		m.sourceCodeUrl,
+		m.trailerVideoUrl,
+		m.issueTrackerUrl,
+		m.wikiUrl,
+		m.donateUrl,
+		m.summary,
+		m.downloads,
+		m.follows,
+		m.comments,
+		m.side,
+		m.category,
+		m.lastReleased,
 		logo.cdnPath AS logoUrl, ST_X(ld.size) AS logoWidth, ST_Y(ld.size) AS logoHeight,
 		logo.created < '".SQL_MOD_CARD_TRANSITION_DATE."' AS hasLegacyLogo,
 		HEX(creator.hash) AS creatorHash,
@@ -62,7 +82,7 @@ SQL, [$asset['modId']]);
 $view->assign('teamMembers', $teamMembers);
 
 $files = $con->getAll(<<<SQL
-	SELECT f.*, ST_X(d.size) AS width, ST_Y(d.size) AS height
+	SELECT f.cdnPath, f.name, f.created, ST_X(d.size) AS width, ST_Y(d.size) AS height
 	FROM files f
 	LEFT JOIN fileImageData d ON d.fileId = f.fileId
 	WHERE f.assetId = ? AND f.fileId NOT IN (?, ?)
