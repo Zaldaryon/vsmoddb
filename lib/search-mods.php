@@ -345,6 +345,7 @@ function queryModSearch($searchParams)
 					case 'o': $value = CATEGORY_OTHER; break;
 					default: assert(false, "Invalid category: $value");
 				}
+				$name = 'm.category';
 				/* fallthrough */
 
 			default:
