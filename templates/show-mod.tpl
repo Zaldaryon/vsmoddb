@@ -1,13 +1,14 @@
 {capture name="head"}
-<meta content="{$asset['name']}" property="og:title" />
-<meta content="{escapeHtml(strip_tags($assetraw['text']))}" property="og:description" />
+<meta property="og:title" content="{$asset['name']}" />
+<meta property="og:description" content="{$asset['summary']}" />
 <meta name="twitter:card" content="summary_large_image">
 {if (empty($asset['logoUrl']))}
-<meta content="/web/img/mod-default.png" property="og:image" />
+<meta property="og:image" content="/web/img/mod-default.png" />
 {else}
-<meta content="{$asset['logoUrl']}" property="og:image" />
+<meta property="og:image" content="{$asset['logoUrl']}" />
 {/if}
-<meta content="#91A357" name="theme-color" />
+<meta property="og:site_name " content="VS ModDB" />
+<meta name="theme-color" content="#91A357" />
 {/capture}
 
 {include file="header"}

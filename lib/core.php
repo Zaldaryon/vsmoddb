@@ -48,12 +48,6 @@ function dump($var)
 	echo "</pre>";
 }
 
-function dump_die($var)
-{
-	dump($var);
-	die();
-}
-
 
 
 /** Splits a string at a separator, but at most once.
@@ -99,6 +93,16 @@ function formatGrammaticallyCorrectEnumeration($array)
 			$str .= $array[$i];
 			return $str;
 	}
+}
+
+/** MB compatible.
+ * @param string $string
+ * @param int $maxLength - length including the ellipsis dots
+ * @return string
+ */
+function formatEllipsis($string, $maxLength)
+{
+	return (mb_strlen($string) <= $maxLength) ? $string : (mb_substr($string, 0, $maxLength - 3).'...');
 }
 
 /** Strips html tags, trailing and leading whitespace and consecutive whitespace, as well as converting html entries to their utf8 counterparts.

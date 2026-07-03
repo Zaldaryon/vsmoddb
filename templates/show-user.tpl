@@ -1,3 +1,11 @@
+{capture name="head"}
+<meta property="og:title" content="{escapeHtml($shownUser['name'])}" />
+{if !empty($shownUser['bio'])}
+<meta property="og:description" content="{escapeHtml(formatEllipsis(strip_tags($shownUser['bio']), 255))}" />
+{/if}
+<meta property="og:site_name " content="VS ModDB" />
+<meta name="theme-color" content="#91A357" />
+{/capture}
 
 {include file="header"}
 
