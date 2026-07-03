@@ -15,9 +15,8 @@
 
 	<link nonce="{$cspNonce}" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" type="text/css">
 
-	<link nonce="{$cspNonce}" href="/web/css/chosen.min.css" rel="stylesheet" type="text/css">
+	<link nonce="{$cspNonce}" href="/web/css/chosen.min.css?v=2" rel="stylesheet" type="text/css">
 	<link nonce="{$cspNonce}" href="/web/css/jquery.fancybox.min.css" rel="stylesheet" type="text/css">
-	<link nonce="{$cspNonce}" href="/web/js/chosen/chosen.min.css" rel="stylesheet" type="text/css">
 	<link nonce="{$cspNonce}" href="/web/css/datepicker.min.css" rel="stylesheet" type="text/css">
 	<link nonce="{$cspNonce}" href="/web/js/tinymce/plugins/spoiler/css/spoiler.css?v=2" rel="stylesheet" type="text/css">
 
@@ -34,7 +33,7 @@
 	{if isset($assetserver) && str_starts_with($assetserver, 'http')}<link rel="dns-prefetch" href="{$assetserver}" />{/if}
 
 	<script nonce="{$cspNonce}" type="text/javascript" src="/web/js/jquery-1.11.1.min.js"></script>
-	<script nonce="{$cspNonce}" type="text/javascript" src="/web/js/chosen/chosen.jquery.min.js?v=3"></script>
+	<script nonce="{$cspNonce}" type="text/javascript" src="/web/js/chosen.jquery.min.js?v=4"></script>
 	{if isset($head)}{$head}{/if}
 </head>
 
