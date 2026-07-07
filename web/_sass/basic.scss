@@ -88,9 +88,10 @@ pre {
 	overflow-x: auto;
 }
 
-code {
+code, [class*="language-"] {
 	word-wrap: break-word;
 	font-family: 'Courier New', Courier, monospace;
+	text-align: left;
 }
 
 
