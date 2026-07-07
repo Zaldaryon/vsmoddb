@@ -16,6 +16,13 @@ var tinymceSettings = {
 	remove_script_host:false,
 	tinycomments_mode: 'embedded',
 	content_css: "/web/css/editor_content.css?ver=6",
+	codesample_global_prismjs: true,
+	codesample_languages: [
+		{ text: "JSON",  value: "json" },
+		{ text: "JSON5",  value: "json5" },
+		{ text: "C#",     value: "csharp" },
+		{ text: "C-Like", value: "c" },
+	],
 	setup: function (editor) {
 		editor.on('change', function(e) { 
 			tinyMCE.triggerSave(); 

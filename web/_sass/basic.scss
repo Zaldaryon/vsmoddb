@@ -93,6 +93,9 @@ code, [class*="language-"] {
 	font-family: 'Courier New', Courier, monospace;
 	text-align: left;
 }
+pre[class*="language-"]{
+	line-height: unset !important;
+}
 
 
 img {

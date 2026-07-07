@@ -9,6 +9,8 @@
 {/if}
 <meta property="og:site_name " content="VS ModDB" />
 <meta name="theme-color" content="#91A357" />
+<link nonce="{$cspNonce}" href="/web/css/prism.min.css?version=0" rel="stylesheet" type="text/css">
+<script nonce="{$cspNonce}" type="text/javascript" src="/web/js/prism.min.js?v=0" defer=""></script>
 {/capture}
 
 {include file="header"}

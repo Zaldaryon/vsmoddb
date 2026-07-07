@@ -1,3 +1,6 @@
+{capture name="head"}
+<link nonce="{$cspNonce}" href="/web/css/prism.min.css?version=0" rel="stylesheet" type="text/css">
+{/capture}
 {include file="header" hclass="innercontent with-buttons-bottom"}
 
 <div class="edit-asset" style="padding: 1em 1em 0 1em">
@@ -449,6 +452,7 @@
 		}
 	</style>
 
+	<script nonce="{$cspNonce}" type="text/javascript" src="/web/js/prism.min.js?v=0" data-manual=""></script>
 	<script nonce="{$cspNonce}" type="text/javascript" src="/web/js/edit-asset.js?version=45" async></script>
 	<script nonce="{$cspNonce}" type="text/javascript" src="/web/js/jquery.fancybox.min.js" async></script>
 {/capture}
