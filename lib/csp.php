@@ -51,7 +51,7 @@ function cspAllowTinyMceComment()
 
 	$tinymce = $_SERVER['HTTP_HOST'].'/web/js/tinymce';
 
-	$_csp['script-src-elem'] = $_csp['default-src']." $tinymce/themes/silver/theme.min.js $tinymce/themes/mobile/theme.min.js $tinymce/plugins/ {$_SERVER['HTTP_HOST']}/web/js/tinymce-custom/plugins/mention/plugin.min.js";
+	$_csp['script-src-elem'] = $_csp['default-src']." $tinymce/themes/silver/theme.min.js $tinymce/themes/mobile/theme.min.js $tinymce/icons/default/icons.min.js $tinymce/plugins/ {$_SERVER['HTTP_HOST']}/web/js/tinymce-custom/plugins/mention/plugin.min.js";
 
 	// Safari apparently doesn't recognize style-src-elem
 	$_csp['style-src'] = $_csp['default-src']." $tinymce/skins/ui/oxide/skin.min.css $tinymce/skins/ui/oxide/content.min.css $tinymce/plugins/spoiler/css/spoiler.css {$_SERVER['HTTP_HOST']}/web/css/editor_content.css";
@@ -66,7 +66,7 @@ function cspAllowTinyMceFull()
 
 	$tinymce = $_SERVER['HTTP_HOST'].'/web/js/tinymce';
 
-	$_csp['script-src-elem'] = $_csp['default-src']." $tinymce/themes/silver/theme.min.js $tinymce/themes/mobile/theme.min.js $tinymce/plugins/ {$_SERVER['HTTP_HOST']}/web/js/tinymce-custom/plugins/mention/plugin.min.js";
+	$_csp['script-src-elem'] = $_csp['default-src']." $tinymce/themes/silver/theme.min.js $tinymce/themes/mobile/theme.min.js $tinymce/icons/default/icons.min.js $tinymce/plugins/ {$_SERVER['HTTP_HOST']}/web/js/tinymce-custom/plugins/mention/plugin.min.js";
 
 	// Safari apparently doesn't recognize style-src-elem
 	$_csp['style-src'] = $_csp['default-src']." $tinymce/skins/ui/oxide/skin.min.css $tinymce/skins/ui/oxide/content.min.css $tinymce/plugins/spoiler/css/spoiler.css {$_SERVER['HTTP_HOST']}/web/css/editor_content.css";

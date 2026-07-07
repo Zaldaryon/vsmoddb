@@ -451,16 +451,12 @@ p:last-child {
 .tox-tinymce, .tox-editor-container {
 	overflow: visible !important;
 }
-.tox .tox-menubar, .tox .tox-toolbar {
+.tox .tox-editor-header {
 	position: sticky;
 	top: 0;
 	z-index: 2;
-}
-.tox .tox-toolbar {
-	top: 39px;
 	border-bottom: 1px solid #ccc;
 }
-
 
 .tox .tox-edit-area__iframe {
 	background-color: var(--color-input) !important;

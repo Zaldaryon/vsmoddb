@@ -17,15 +17,14 @@
 
 	<link nonce="{$cspNonce}" href="/web/css/chosen.min.css?v=2" rel="stylesheet" type="text/css">
 	<link nonce="{$cspNonce}" href="/web/css/jquery.fancybox.min.css" rel="stylesheet" type="text/css">
-	<link nonce="{$cspNonce}" href="/web/css/datepicker.min.css" rel="stylesheet" type="text/css">
-	<link nonce="{$cspNonce}" href="/web/js/tinymce/plugins/spoiler/css/spoiler.css?v=2" rel="stylesheet" type="text/css">
+	<link nonce="{$cspNonce}" href="/web/js/tinymce/plugins/spoiler/css/spoiler.css?v=3" rel="stylesheet" type="text/css">
 
-	<link nonce="{$cspNonce}" href="/web/js/tinymce/skins/ui/oxide/skin.mobile.min.css" as="style">
-	<link nonce="{$cspNonce}" href="/web/js/tinymce/skins/ui/oxide/content.mobile.min.css" as="style">
+	<link nonce="{$cspNonce}" href="/web/js/tinymce/skins/ui/oxide/skin.mobile.min.css?v=2" as="style">
+	<link nonce="{$cspNonce}" href="/web/js/tinymce/skins/ui/oxide/content.mobile.min.css?v=2" as="style">
 	<link nonce="{$cspNonce}" href="/web/js/tinymce/skins/ui/oxide/fonts/tinymce-mobile.woff?8x92w3" as="font">
 
-	<link nonce="{$cspNonce}" href="/web/js/tinymce/skins/ui/oxide/skin.min.css" as="style">
-	<link nonce="{$cspNonce}" href="/web/js/tinymce/skins/ui/oxide/content.min.css" as="style">
+	<link nonce="{$cspNonce}" href="/web/js/tinymce/skins/ui/oxide/skin.min.css?v=2" as="style">
+	<link nonce="{$cspNonce}" href="/web/js/tinymce/skins/ui/oxide/content.min.css?v=2" as="style">
 	<link nonce="{$cspNonce}" href="/web/css/editor_content.css?ver=4" as="style">
 
 	<link nonce="{$cspNonce}" href="/web/css/style.css?version=108" rel="stylesheet" type="text/css">

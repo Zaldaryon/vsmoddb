@@ -8,7 +8,7 @@
 	</div>
 
 	<script nonce="{$cspNonce}" type="text/javascript" src="/web/js/jquery.cookie.js"></script>
-	<script nonce="{$cspNonce}" type="text/javascript" src="/web/js/tinymce/tinymce.min.js"></script>
+	<script nonce="{$cspNonce}" type="text/javascript" src="/web/js/tinymce/tinymce.min.js?v=2"></script>
 
 	<script nonce="{$cspNonce}" type="text/javascript">
 		assetid = {$asset['assetId'] ?? 0};
