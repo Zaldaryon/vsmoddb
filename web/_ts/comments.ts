@@ -109,8 +109,7 @@ function attachCommentHandlers() {
 		$('form[name=commentformtemplate]').trigger('reinitialize.areYouSure');
 		
 		const ta = e.currentTarget as HTMLTextAreaElement
-		createEditor(ta, tinymceSettingsCmt);
-		setTimeout(() => tinyMCE.get(ta.id).focus(), 100);
+		createEditor(ta, tinymceSettingsCmt, true);
 	});
 
 	$("button[name='save']", newCommentWrapperEl).click(function (e : MouseEvent) {
@@ -430,9 +429,7 @@ function attachCommentHandlers() {
 		$(formEl).areYouSure();
 
 		const editorTAEl = formEl.getElementsByTagName("textarea")[0];
-		createEditor(editorTAEl, tinymceSettingsCmt);
-
-		setTimeout(() => tinyMCE.get(editorTAEl.id).focus(), 100);
+		createEditor(editorTAEl, tinymceSettingsCmt, true);
 
 		const button = formEl.querySelector("button[name='save']")! as HTMLButtonElement;
 		button.addEventListener('click', (e) => {

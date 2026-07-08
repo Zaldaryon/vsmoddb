@@ -1,4 +1,7 @@
+const tiny_ver = '5.10.9';
+
 var tinymceSettings = {
+	cache_suffix: '?v='+tiny_ver,
 	//NOTE(Rennorb): TinyMCE mobile has a whitelist for plugins, so if we want specific ones we need to use the external_plugins directive.
 	// Better practice either way, became it makes updating TinyMCE a lot easer.
 	plugins: 'paste print preview searchreplace autolink autoresize directionality visualblocks visualchars fullscreen image link media code codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime emoticons advlist lists wordcount imagetools textpattern help spoiler mention noneditable',
@@ -6,7 +9,7 @@ var tinymceSettings = {
 		'mention': '/web/js/tinymce-custom/plugins/mention/plugin.min.js?v=2',
 	},
 	toolbar: 'formatselect | bold italic strikethrough forecolor backcolor permanentpen formatpainter | link image media pageembed emoticons | alignleft aligncenter alignright alignjustify  | numlist bullist outdent indent | removeformat code | spoiler-add spoiler-remove',
-	toolbar_sticky: true,
+	//toolbar_sticky: true, // TODO(Rennorb): seems to be broken, has been for a long time. re-investigate at some point.
 	image_advtab: true,
 	importcss_append: true,
 	height: 400,
@@ -54,11 +57,12 @@ var tinymceSettings = {
 };
 
 var tinymceSettingsCmt = {
+	cache_suffix: tinymceSettings.cache_suffix,
 	menubar: false,
 	plugins: 'paste searchreplace autolink autoresize directionality image link codesample charmap hr pagebreak nonbreaking anchor emoticons advlist lists wordcount imagetools textpattern help spoiler mention noneditable',
 	external_plugins: tinymceSettings.external_plugins,
 	toolbar: 'bold italic strikethrough | link image emoticons | alignleft aligncenter alignright alignjustify  | numlist bullist outdent indent | removeformat | spoiler-add spoiler-remove',
-	toolbar_sticky: true,
+	//toolbar_sticky: true, // TODO(Rennorb): seems to be broken, has been for a long time. re-investigate at some point.
 	image_advtab: true,
 	importcss_append: true,
 	min_height: 200 /* @hack: required for mobile */,
@@ -117,10 +121,11 @@ var tinymceSettingsCmt = {
 
 
 var tinymceSettingsReport = {
+	cache_suffix: tinymceSettings.cache_suffix,
 	menubar: false,
 	plugins: 'paste searchreplace autolink autoresize image link codesample charmap hr pagebreak nonbreaking anchor emoticons advlist lists wordcount imagetools textpattern help spoiler noneditable',
 	toolbar: 'bold italic strikethrough | link image emoticons | numlist bullist outdent indent | removeformat | spoiler-add spoiler-remove',
-	toolbar_sticky: true,
+	//toolbar_sticky: true, // TODO(Rennorb): seems to be broken, has been for a long time. re-investigate at some point.
 	image_advtab: true,
 	importcss_append: true,
 	min_height: 200 /* @hack: required for mobile */,
@@ -239,7 +244,7 @@ function wrapAsSpoilerForTMCE(nodes : HTMLElement[], isCrashReport : boolean) : 
 
 
 
-function createEditor(target : HTMLTextAreaElement, settings) : void {
+function createEditor(target : HTMLTextAreaElement, settings, auto_focus = false) : void {
 	if (!target.id) {
 		// Give it an id for later removal:
 		//TODO(Rennorb) @cleanup: get rid of this
@@ -248,7 +253,7 @@ function createEditor(target : HTMLTextAreaElement, settings) : void {
 
 	// We need to shallow copy here, otherwise multiple invocations of this will overwrite the target in the settings object and mangle ech other.
 	// Seems to be a race condition in tiny.
-	settings = Object.assign({}, settings)
+	settings = Object.assign(auto_focus ? { auto_focus : target.id } : {}, settings)
 
 	settings.target = target;
 

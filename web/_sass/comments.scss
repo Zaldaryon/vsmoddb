@@ -37,7 +37,7 @@
 
 	&.editbox {
 		position: relative; /* fix for escaping elements covering other parts of the site */
-		overflow: hidden; // required for ribbons
+		overflow: hidden; // required for ribbons, but breaks sticky headers. should we remove it here? 
 		padding: 0px;
 		background: rgba(219, 208, 182, 0.7);
 	}
