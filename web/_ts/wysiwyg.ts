@@ -6,7 +6,7 @@ var tinymceSettings = {
 	// Better practice either way, became it makes updating TinyMCE a lot easer.
 	plugins: 'paste print preview searchreplace autolink autoresize directionality visualblocks visualchars fullscreen image link media code codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime emoticons advlist lists wordcount imagetools textpattern help spoiler mention noneditable',
 	external_plugins: {
-		'mention': '/web/js/tinymce-custom/plugins/mention/plugin.min.js?v=2',
+		'mention': '/web/js/tinymce-custom/plugins/mention/plugin.min.js?v=8',
 	},
 	toolbar: 'formatselect | bold italic strikethrough forecolor backcolor permanentpen formatpainter | link image media pageembed emoticons | alignleft aligncenter alignright alignjustify  | numlist bullist outdent indent | removeformat code | spoiler-add spoiler-remove',
 	//toolbar_sticky: true, // TODO(Rennorb): seems to be broken, has been for a long time. re-investigate at some point.
